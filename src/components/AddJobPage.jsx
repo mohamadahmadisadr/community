@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Container,
   TextField,
   Button,
   Typography,
   Box,
+  Paper,
+  IconButton,
 } from "@mui/material";
+import { ArrowBack } from "@mui/icons-material";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig"; // Adjust the path to your Firebase config file
-import Header from "../pages/MyHeader";
-import Footer from "../pages/MyFooter";
+import { db } from "../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 const AddJobPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -19,7 +22,7 @@ const AddJobPage = () => {
     province: "",
     city: "",
     link: "",
-    image: "", // New field for image URL
+    image: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +34,6 @@ const AddJobPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if all required fields are filled
     if (
       !formData.title ||
       !formData.description ||
@@ -46,25 +48,16 @@ const AddJobPage = () => {
     setLoading(true);
 
     try {
-      // Use placeholder image if no image URL is provided
-      const imageUrl = formData.image || "https://placehold.co/400";
+      const imageUrl = formData.image || "https://placehold.co/400x300/1976d2/white?text=Job";
 
-      // Add job to Firestore
       await addDoc(collection(db, "jobs"), {
         ...formData,
         image: imageUrl,
+        createdAt: new Date(),
       });
 
       alert("Job added successfully!");
-      setFormData({
-        title: "",
-        description: "",
-        country: "",
-        province: "",
-        city: "",
-        link: "",
-        image: "",
-      });
+      navigate('/jobs');
     } catch (error) {
       console.error("Error adding job:", error);
       alert("Failed to add job. Please try again.");
@@ -74,82 +67,81 @@ const AddJobPage = () => {
   };
 
   return (
-    <>
-      <Header />
-      <Container
-        component="main"
-        maxWidth="sm"
-        sx={{
-          mt: 10,
-          mb: 8,
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: "bold",
-            mb: 4,
-          }}
-        >
-          Add a Job
+    <Container maxWidth="sm" sx={{ pt: 2, pb: 2 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <IconButton onClick={() => navigate('/jobs')} sx={{ mr: 1 }}>
+          <ArrowBack />
+        </IconButton>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+          Post New Job
         </Typography>
+      </Box>
+
+      <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            label="Job Title"
+            label="Job Title *"
             name="title"
             value={formData.title}
             onChange={handleChange}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             required
           />
+
           <TextField
             fullWidth
-            label="Job Description"
+            label="Job Description *"
             name="description"
             value={formData.description}
             onChange={handleChange}
             multiline
             rows={4}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             required
           />
+
           <TextField
             fullWidth
-            label="Country"
+            label="Country *"
             name="country"
             value={formData.country}
             onChange={handleChange}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             required
           />
+
           <TextField
             fullWidth
-            label="Province"
+            label="Province *"
             name="province"
             value={formData.province}
             onChange={handleChange}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             required
           />
+
           <TextField
             fullWidth
-            label="City"
+            label="City *"
             name="city"
             value={formData.city}
             onChange={handleChange}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
             required
           />
+
           <TextField
             fullWidth
-            label="Link to Apply (Optional)"
+            label="Application Link (Optional)"
             name="link"
             value={formData.link}
             onChange={handleChange}
-            sx={{ mb: 3 }}
+            sx={{ mb: 2 }}
+            placeholder="https://example.com/apply"
           />
+
           <TextField
             fullWidth
             label="Image URL (Optional)"
@@ -157,11 +149,12 @@ const AddJobPage = () => {
             value={formData.image}
             onChange={handleChange}
             sx={{ mb: 3 }}
+            placeholder="https://example.com/image.jpg"
           />
+
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
             disabled={loading}
             sx={{
@@ -169,14 +162,14 @@ const AddJobPage = () => {
               fontSize: "1rem",
               fontWeight: "bold",
               textTransform: "none",
+              borderRadius: 2,
             }}
           >
-            {loading ? "Submitting..." : "Submit Job"}
+            {loading ? "Posting Job..." : "Post Job"}
           </Button>
         </Box>
-      </Container>
-      <Footer />
-    </>
+      </Paper>
+    </Container>
   );
 };
 
