@@ -1,6 +1,6 @@
 
 import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { Work, Event, Restaurant, LocalCafe } from '@mui/icons-material';
+import { Work, Event, Restaurant, Person } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const BottomNavigation = () => {
@@ -14,9 +14,9 @@ const BottomNavigation = () => {
       return 0;
     } else if (path.startsWith('/events') || path.startsWith('/addEvent')) {
       return 1;
-    } else if (path.startsWith('/restaurants') || path.startsWith('/addRestaurant')) {
+    } else if (path.startsWith('/dining') || path.startsWith('/restaurants') || path.startsWith('/cafes') || path.startsWith('/addRestaurant') || path.startsWith('/addCafe')) {
       return 2;
-    } else if (path.startsWith('/cafes') || path.startsWith('/addCafe')) {
+    } else if (path.startsWith('/profile')) {
       return 3;
     }
     return 0; // Default to jobs
@@ -31,10 +31,10 @@ const BottomNavigation = () => {
         navigate('/events');
         break;
       case 2:
-        navigate('/restaurants');
+        navigate('/dining');
         break;
       case 3:
-        navigate('/cafes');
+        navigate('/profile');
         break;
       default:
         navigate('/jobs');
@@ -94,7 +94,7 @@ const BottomNavigation = () => {
           }}
         />
         <BottomNavigationAction
-          label="Restaurant"
+          label="Dining"
           icon={<Restaurant />}
           sx={{
             color: '#4ecdc4',
@@ -104,8 +104,8 @@ const BottomNavigation = () => {
           }}
         />
         <BottomNavigationAction
-          label="Café"
-          icon={<LocalCafe />}
+          label="Profile"
+          icon={<Person />}
           sx={{
             color: '#96ceb4',
             '&.Mui-selected': {

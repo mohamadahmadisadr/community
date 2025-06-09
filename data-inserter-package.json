@@ -1,0 +1,30 @@
+{
+  "name": "iranian-community-data-inserter",
+  "version": "1.0.0",
+  "description": "Data insertion script for Iranian Community Canada restaurants and cafés",
+  "main": "insertData.js",
+  "scripts": {
+    "start": "node insertData.js",
+    "insert": "node insertData.js",
+    "test": "node -e \"console.log('Data inserter ready!')\""
+  },
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "firebase",
+    "firestore",
+    "data-insertion",
+    "iranian-community",
+    "restaurants",
+    "cafes"
+  ],
+  "author": "Iranian Community Canada",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Typography,
   Grid,
   Card,
@@ -11,14 +10,17 @@ import {
   Box,
   Fab,
   InputAdornment,
-  AppBar,
-  Toolbar,
   Avatar,
+  Button,
 } from '@mui/material';
-import { Add, Search, CalendarToday, LocationOn, Event, AccessTime, AttachMoney } from '@mui/icons-material';
-import { collection, getDocs } from 'firebase/firestore';
+import { Add, Search, CalendarToday, LocationOn, Event, AccessTime, AttachMoney, Share, Visibility } from '@mui/icons-material';
+import AppBarLayout from '../../layouts/AppBarLayout';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import usePagination from '../../hooks/usePagination';
+import InfiniteScrollComponent from '../../components/common/InfiniteScrollComponent';
+import { getClickableChipProps } from '../../utils/contactUtils';
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -32,11 +34,17 @@ const EventsPage = () => {
 
   const fetchEvents = async () => {
     try {
+      // Get all events and filter for approved ones or those without status (old data)
       const querySnapshot = await getDocs(collection(db, 'events'));
-      const eventsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const eventsData = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((event) => {
+          // Show events that are approved/active OR don't have a status field (old data)
+          return !event.status || event.status === "active" || event.status === "approved";
+        });
       setEvents(eventsData);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -48,9 +56,28 @@ const EventsPage = () => {
   const filteredEvents = events.filter(
     (event) =>
       event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      event.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.location?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
+      event.city?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
+      event.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Infinite Scroll Pagination
+  const {
+    paginatedData: displayedEvents,
+    resetPagination,
+    totalItems,
+    displayedItemsCount,
+    loadingRef,
+    hasMoreItems,
+    isLoading
+  } = usePagination(filteredEvents, 6, true); // Enable infinite scroll
+
+  // Reset pagination when search changes
+  React.useEffect(() => {
+    resetPagination();
+  }, [searchQuery, resetPagination]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -74,37 +101,35 @@ const EventsPage = () => {
 
   const eventColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F8B500', '#FF8A80'];
 
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Material Design AppBar */}
-      <AppBar
-        position="static"
-        sx={{
-          background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          m: 0,
-          p: 0
-        }}
-      >
-        <Toolbar>
-          <Avatar sx={{ bgcolor: '#fff', color: '#ff6b6b', mr: 2 }}>
-            <Event />
-          </Avatar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Events
-          </Typography>
-          <Chip
-            label={`${filteredEvents.length} Events`}
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              fontWeight: 'bold'
-            }}
-          />
-        </Toolbar>
-      </AppBar>
+  const handleViewDetails = (event) => {
+    navigate(`/event/${event.id}`);
+  };
 
-      <Container maxWidth={false} sx={{ pt: 2, pb: 2, px: 2, m: 0 }}>
+  const handleShare = (event) => {
+    const eventUrl = `${window.location.origin}/event/${event.id}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: event.title,
+        text: `Check out this event: ${event.title}`,
+        url: eventUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(eventUrl).then(() => {
+        alert("Event link copied to clipboard!");
+      });
+    }
+  };
+
+  return (
+    <AppBarLayout
+      title="Events"
+      icon={<Event />}
+      gradient="linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"
+      iconColor="#ff6b6b"
+      count={filteredEvents.length}
+      countLabel="Events"
+    >
         {/* Search */}
         <TextField
           fullWidth
@@ -135,7 +160,7 @@ const EventsPage = () => {
 
         {/* Events Grid */}
         <Grid container spacing={3}>
-          {filteredEvents.map((event, index) => (
+          {displayedEvents.map((event, index) => (
             <Grid item xs={12} sm={6} md={4} key={event.id}>
               <Card
                 sx={{
@@ -224,16 +249,24 @@ const EventsPage = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Chip
                       icon={<LocationOn />}
-                      label={`${event.location}, ${event.city}`}
+                      label={`${event.location?.name || event.location}, ${event.location?.city || event.city}`}
                       size="small"
                       variant="outlined"
                       sx={{
                         borderColor: '#6c757d',
                         color: '#6c757d',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
                           color: '#6c757d'
+                        },
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          backgroundColor: '#6c757d10'
                         }
                       }}
+                      {...getClickableChipProps('address', event.location?.name || event.location, event.location?.city || event.city)}
                     />
                   </Box>
 
@@ -283,11 +316,64 @@ const EventsPage = () => {
                       />
                     )}
                   </Box>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Visibility />}
+                      onClick={() => handleViewDetails(event)}
+                      sx={{
+                        flex: 1,
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        background: `linear-gradient(135deg, ${eventColors[index % eventColors.length]} 0%, ${eventColors[index % eventColors.length]}CC 100%)`,
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: `0 4px 12px ${eventColors[index % eventColors.length]}40`,
+                        }
+                      }}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Share />}
+                      onClick={() => handleShare(event)}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        borderColor: eventColors[index % eventColors.length],
+                        color: eventColors[index % eventColors.length],
+                        '&:hover': {
+                          borderColor: eventColors[index % eventColors.length],
+                          backgroundColor: `${eventColors[index % eventColors.length]}10`,
+                          transform: 'translateY(-1px)',
+                        }
+                      }}
+                    >
+                      Share
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+
+        {/* Infinite Scroll */}
+        {!loading && filteredEvents.length > 0 && (
+          <InfiniteScrollComponent
+            totalItems={totalItems}
+            displayedItemsCount={displayedItemsCount}
+            hasMoreItems={hasMoreItems}
+            loadingRef={loadingRef}
+            isLoading={isLoading}
+            color="#ff6b6b"
+          />
+        )}
 
         {/* Empty State */}
         {!loading && filteredEvents.length === 0 && (
@@ -318,7 +404,7 @@ const EventsPage = () => {
           onClick={() => navigate('/addEvent')}
           sx={{
             position: 'fixed',
-            bottom: 80,
+            bottom: 120,
             right: 16,
             zIndex: 1000,
             background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
@@ -332,8 +418,7 @@ const EventsPage = () => {
         >
           <Add />
         </Fab>
-      </Container>
-    </Box>
+    </AppBarLayout>
   );
 };
 

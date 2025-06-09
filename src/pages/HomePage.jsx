@@ -1,5 +1,5 @@
+import React from 'react';
 import {
-  Container,
   Typography,
   Grid,
   Box,
@@ -10,13 +10,15 @@ import {
   TextField,
   Fab,
   InputAdornment,
-  AppBar,
-  Toolbar,
   Avatar,
+  Button,
 } from "@mui/material";
-import { Add, Search, LocationOn, Work, Business } from "@mui/icons-material";
+import { Add, Search, LocationOn, Work, Business, Share, Visibility } from "@mui/icons-material";
 import EllipsisTypography from "../pages/custom/EllipsisTypography";
 import { useNavigate } from "react-router-dom";
+import AppBarLayout from "../layouts/AppBarLayout";
+import usePagination from '../hooks/usePagination';
+import InfiniteScrollComponent from '../components/common/InfiniteScrollComponent';
 
 const HomePage = ({ jobs, searchQuery, onSearch }) => {
   const navigate = useNavigate();
@@ -25,11 +27,47 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
     navigate(`/job/${job.id}`);
   };
 
+  const handleShare = (job, event) => {
+    event.stopPropagation(); // Prevent card click
+    const jobUrl = `${window.location.origin}/job/${job.id}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: job.title,
+        text: `Check out this job opportunity: ${job.title}`,
+        url: jobUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(jobUrl).then(() => {
+        alert("Job link copied to clipboard!");
+      });
+    }
+  };
+
   const filteredJobs = jobs.filter(
     (job) =>
       job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      job.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.city?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
+      job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Infinite Scroll Pagination
+  const {
+    paginatedData: displayedJobs,
+    resetPagination,
+    totalItems,
+    displayedItemsCount,
+    loadingRef,
+    hasMoreItems,
+    isLoading
+  } = usePagination(filteredJobs, 6, true); // Enable infinite scroll
+
+  // Reset pagination when search changes
+  React.useEffect(() => {
+    resetPagination();
+  }, [searchQuery, resetPagination]);
 
   // Helper function to determine text direction and font
   const getTextDirection = (text) => {
@@ -45,36 +83,14 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
   const jobColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Material Design AppBar */}
-      <AppBar
-        position="static"
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          m: 0,
-          p: 0
-        }}
-      >
-        <Toolbar>
-          <Avatar sx={{ bgcolor: '#fff', color: '#667eea', mr: 2 }}>
-            <Work />
-          </Avatar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Jobs
-          </Typography>
-          <Chip
-            label={`${filteredJobs.length} Available`}
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              fontWeight: 'bold'
-            }}
-          />
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth={false} sx={{ pt: 2, pb: 2, px: 2, m: 0 }}>
+    <AppBarLayout
+      title="Jobs"
+      icon={<Work />}
+      gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      iconColor="#667eea"
+      count={filteredJobs.length}
+      countLabel="Available"
+    >
         {/* Search */}
         <TextField
           fullWidth
@@ -105,15 +121,13 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
 
         {/* Jobs Grid */}
         <Grid container spacing={3}>
-          {filteredJobs.map((job, index) => (
+          {displayedJobs.map((job, index) => (
             <Grid item xs={12} sm={6} md={4} key={job.id}>
               <Card
-                onClick={() => handleViewDetails(job)}
                 sx={{
                   borderRadius: 4,
                   boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'pointer',
                   border: `2px solid ${jobColors[index % jobColors.length]}20`,
                   '&:hover': {
                     transform: 'translateY(-8px) scale(1.02)',
@@ -164,7 +178,7 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Chip
                       icon={<LocationOn />}
-                      label={`${job.city}, ${job.province}`}
+                      label={`${job.location?.city || job.city}, ${job.location?.province || job.province}`}
                       size="small"
                       sx={{
                         bgcolor: `${jobColors[index % jobColors.length]}15`,
@@ -192,10 +206,10 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
                   </EllipsisTypography>
 
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {job.country && (
+                    {job.company && (
                       <Chip
                         icon={<Business />}
-                        label={job.country}
+                        label={job.company}
                         size="small"
                         variant="outlined"
                         sx={{
@@ -204,7 +218,29 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
                         }}
                       />
                     )}
-                    {job.link && (
+                    {job.category && job.category !== 'General' && (
+                      <Chip
+                        label={job.category}
+                        size="small"
+                        sx={{
+                          bgcolor: `${jobColors[index % jobColors.length]}20`,
+                          color: jobColors[index % jobColors.length],
+                          fontWeight: 'bold'
+                        }}
+                      />
+                    )}
+                    {job.jobType && (
+                      <Chip
+                        label={job.jobType}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: '#6c757d',
+                          color: '#6c757d'
+                        }}
+                      />
+                    )}
+                    {(job.applicationLink || job.link) && (
                       <Chip
                         label="Apply Now"
                         size="small"
@@ -220,11 +256,64 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
                       />
                     )}
                   </Box>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Visibility />}
+                      onClick={() => handleViewDetails(job)}
+                      sx={{
+                        flex: 1,
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        background: `linear-gradient(135deg, ${jobColors[index % jobColors.length]} 0%, ${jobColors[index % jobColors.length]}CC 100%)`,
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: `0 4px 12px ${jobColors[index % jobColors.length]}40`,
+                        }
+                      }}
+                    >
+                      View Details
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Share />}
+                      onClick={(event) => handleShare(job, event)}
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 2,
+                        borderColor: jobColors[index % jobColors.length],
+                        color: jobColors[index % jobColors.length],
+                        '&:hover': {
+                          borderColor: jobColors[index % jobColors.length],
+                          backgroundColor: `${jobColors[index % jobColors.length]}10`,
+                          transform: 'translateY(-1px)',
+                        }
+                      }}
+                    >
+                      Share
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
+
+        {/* Infinite Scroll */}
+        {filteredJobs.length > 0 && (
+          <InfiniteScrollComponent
+            totalItems={totalItems}
+            displayedItemsCount={displayedItemsCount}
+            hasMoreItems={hasMoreItems}
+            loadingRef={loadingRef}
+            isLoading={isLoading}
+            color="#667eea"
+          />
+        )}
 
         {/* Empty State */}
         {filteredJobs.length === 0 && (
@@ -255,7 +344,7 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
           onClick={() => navigate('/addJob')}
           sx={{
             position: 'fixed',
-            bottom: 80,
+            bottom: 120,
             right: 16,
             zIndex: 1000,
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -269,8 +358,7 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
         >
           <Add />
         </Fab>
-      </Container>
-    </Box>
+    </AppBarLayout>
   );
 };
 

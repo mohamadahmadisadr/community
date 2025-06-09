@@ -82,12 +82,66 @@ const AddCafePage = () => {
       const imageUrl = formData.image || 'https://placehold.co/400x300/1976d2/white?text=Cafe';
 
       await addDoc(collection(db, 'cafes'), {
-        ...formData,
+        name: formData.name,
+        description: formData.description || "",
+        specialty: formData.specialty || "Coffee",
+        category: "Cafe",
+        location: {
+          address: formData.address,
+          city: formData.city,
+          province: "",
+          postalCode: "",
+          coordinates: {
+            lat: null,
+            lng: null
+          }
+        },
+        contact: {
+          phone: formData.phone || "",
+          email: "",
+          website: formData.website || ""
+        },
+        hours: {
+          monday: "",
+          tuesday: "",
+          wednesday: "",
+          thursday: "",
+          friday: "",
+          saturday: "",
+          sunday: ""
+        },
+        priceRange: formData.priceRange || "$$",
+        rating: parseFloat(formData.rating) || 0,
+        reviewCount: 0,
+        features: {
+          hasWifi: formData.hasWifi || false,
+          hasOutdoorSeating: formData.hasOutdoorSeating || false,
+          hasParking: formData.hasParking || false,
+          petFriendly: formData.petFriendly || false,
+          hasDelivery: false,
+          hasTakeout: true
+        },
+        amenities: [
+          ...(formData.hasWifi ? ["free-wifi"] : []),
+          ...(formData.hasOutdoorSeating ? ["outdoor-seating"] : []),
+          ...(formData.hasParking ? ["parking"] : []),
+          ...(formData.petFriendly ? ["pet-friendly"] : [])
+        ],
+        paymentMethods: ["cash", "card"],
         image: imageUrl,
+        images: [],
+        menu: "",
+        status: "pending", // Requires admin approval
+        verified: false,
+        featured: false,
+        views: 0,
+        postedBy: "anonymous", // Will be updated when user auth is implemented
+        approvedBy: null,
         createdAt: new Date(),
+        updatedAt: new Date()
       });
 
-      alert('Café added successfully!');
+      alert('Café submitted successfully! It will be visible after admin approval.');
       navigate('/cafes');
     } catch (error) {
       console.error('Error adding café:', error);

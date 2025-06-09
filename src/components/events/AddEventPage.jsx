@@ -65,12 +65,45 @@ const AddEventPage = () => {
       const imageUrl = formData.image || 'https://placehold.co/400x300/1976d2/white?text=Event';
 
       await addDoc(collection(db, 'events'), {
-        ...formData,
+        title: formData.title,
+        description: formData.description || "",
+        category: formData.category || "Cultural",
+        date: new Date(formData.date),
+        time: formData.time || "",
+        endTime: "",
+        location: {
+          name: formData.location,
+          address: "",
+          city: formData.city,
+          province: "",
+          coordinates: {
+            lat: null,
+            lng: null
+          }
+        },
+        organizer: {
+          name: "",
+          email: "",
+          phone: ""
+        },
+        price: formData.price || "Free",
+        capacity: null,
+        registeredCount: 0,
+        registrationLink: "",
         image: imageUrl,
+        images: [],
+        status: "pending", // Requires admin approval
+        featured: false,
+        tags: [],
+        ageRestriction: "all",
+        requirements: [],
+        postedBy: "anonymous", // Will be updated when user auth is implemented
+        approvedBy: null,
         createdAt: new Date(),
+        updatedAt: new Date()
       });
 
-      alert('Event added successfully!');
+      alert('Event submitted successfully! It will be visible after admin approval.');
       navigate('/events');
     } catch (error) {
       console.error('Error adding event:', error);

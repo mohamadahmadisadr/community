@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Container,
   Typography,
   Grid,
   Card,
@@ -12,11 +11,10 @@ import {
   Fab,
   Rating,
   InputAdornment,
-  AppBar,
-  Toolbar,
   Avatar,
 } from '@mui/material';
 import { Add, Search, LocationOn, Phone, Schedule, Wifi, LocalCafe, Star, AttachMoney, DirectionsCar, Pets } from '@mui/icons-material';
+import AppBarLayout from '../../layouts/AppBarLayout';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
@@ -66,36 +64,14 @@ const CafesPage = () => {
   const cafeColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F8B500', '#FF8A80'];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Material Design AppBar */}
-      <AppBar
-        position="static"
-        sx={{
-          background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          m: 0,
-          p: 0
-        }}
-      >
-        <Toolbar>
-          <Avatar sx={{ bgcolor: '#fff', color: '#96ceb4', mr: 2 }}>
-            <LocalCafe />
-          </Avatar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Café
-          </Typography>
-          <Chip
-            label={`${filteredCafes.length} Cafés`}
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              fontWeight: 'bold'
-            }}
-          />
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth={false} sx={{ pt: 2, pb: 2, px: 2, m: 0 }}>
+    <AppBarLayout
+      title="Café"
+      icon={<LocalCafe />}
+      gradient="linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)"
+      iconColor="#96ceb4"
+      count={filteredCafes.length}
+      countLabel="Cafés"
+    >
         {/* Search */}
         <TextField
           fullWidth
@@ -408,8 +384,7 @@ const CafesPage = () => {
         >
           <Add />
         </Fab>
-      </Container>
-    </Box>
+    </AppBarLayout>
   );
 };
 

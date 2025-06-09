@@ -9,42 +9,47 @@ import JobDetailPage from './components/JobDetail/JobDetailComponent';
 import AddJobPage from './components/AddJobPage';
 import EventsPage from './components/events/EventsPage';
 import AddEventPage from './components/events/AddEventPage';
-import RestaurantsPage from './components/restaurants/RestaurantsPage';
+import DiningPage from './components/dining/DiningPage';
+import RestaurantDetailPage from './components/restaurants/RestaurantDetailPage';
+import CafeDetailPage from './components/cafes/CafeDetailPage';
+import EventDetailPage from './components/events/EventDetailPage';
 import AddRestaurantPage from './components/restaurants/AddRestaurantPage';
-import CafesPage from './components/cafes/CafesPage';
 import AddCafePage from './components/cafes/AddCafePage';
-import BottomNavigation from './components/BottomNavigation';
-import { Box } from '@mui/material';
+import ProfilePage from './components/profile/ProfilePage';
+import BaseLayout from './layouts/BaseLayout';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import telegramTheme from './theme/telegramTheme';
 
 function App() {
   return (
-    <AuthProvider>
-      <Box sx={{
-        m: 0,
-        p: 0,
-        pb: 8, // Only bottom padding for bottom navigation
-        minHeight: '100vh',
-        width: '100%'
-      }}>
-        <Routes>
-          <Route path="/" element={<HomePageComponent/>}/>
-          <Route path="/jobs" element={<HomePageComponent/>}/>
-          <Route path="/events" element={<EventsPage/>}/>
-          <Route path="/restaurants" element={<RestaurantsPage/>}/>
-          <Route path="/cafes" element={<CafesPage/>}/>
-          <Route path="/login" element={<LoginComponent/>}/>
-          <Route path="/register" element={<RegisterComponent/>}/>
-          <Route path="/about" element={<AboutPage/>}/>
-          <Route path="/job/:id" element={<JobDetailPage/>}/>
-          <Route path='/addJob' element={<AddJobPage/>}/>
-          <Route path='/addEvent' element={<AddEventPage/>}/>
-          <Route path='/addRestaurant' element={<AddRestaurantPage/>}/>
-          <Route path='/addCafe' element={<AddCafePage/>}/>
-          <Route path="*" element={<div>404 Not Found</div>}/>
-        </Routes>
-      </Box>
-      <BottomNavigation />
-    </AuthProvider>
+    <ThemeProvider theme={telegramTheme}>
+      <CssBaseline />
+      <AuthProvider>
+        <BaseLayout>
+          <Routes>
+            <Route path="/" element={<HomePageComponent/>}/>
+            <Route path="/jobs" element={<HomePageComponent/>}/>
+            <Route path="/events" element={<EventsPage/>}/>
+          <Route path="/dining" element={<DiningPage/>}/>
+            <Route path="/restaurants" element={<DiningPage/>}/>
+            <Route path="/cafes" element={<DiningPage/>}/>
+          <Route path="/profile" element={<ProfilePage/>}/>
+            <Route path="/login" element={<LoginComponent/>}/>
+            <Route path="/register" element={<RegisterComponent/>}/>
+            <Route path="/about" element={<AboutPage/>}/>
+            <Route path="/job/:id" element={<JobDetailPage/>}/>
+          <Route path="/event/:id" element={<EventDetailPage/>}/>
+          <Route path="/restaurant/:id" element={<RestaurantDetailPage/>}/>
+          <Route path="/cafe/:id" element={<CafeDetailPage/>}/>
+            <Route path='/addJob' element={<AddJobPage/>}/>
+            <Route path='/addEvent' element={<AddEventPage/>}/>
+            <Route path='/addRestaurant' element={<AddRestaurantPage/>}/>
+            <Route path='/addCafe' element={<AddCafePage/>}/>
+            <Route path="*" element={<div>404 Not Found</div>}/>
+          </Routes>
+        </BaseLayout>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

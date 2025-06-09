@@ -51,12 +51,41 @@ const AddJobPage = () => {
       const imageUrl = formData.image || "https://placehold.co/400x300/1976d2/white?text=Job";
 
       await addDoc(collection(db, "jobs"), {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        location: {
+          city: formData.city,
+          province: formData.province,
+          country: formData.country,
+          address: "" // Can be added later via admin panel
+        },
+        company: "", // Can be added later via admin panel
+        salary: {
+          min: null,
+          max: null,
+          currency: "CAD",
+          type: "annual"
+        },
+        jobType: "full-time", // Default value
+        category: "General", // Default category
+        requirements: [],
+        benefits: [],
+        contactEmail: "",
+        contactPhone: "",
+        applicationLink: formData.link || "",
         image: imageUrl,
+        status: "pending", // Requires admin approval
+        featured: false,
+        views: 0,
+        applications: 0,
+        expiryDate: null,
+        postedBy: "anonymous", // Will be updated when user auth is implemented
+        approvedBy: null,
         createdAt: new Date(),
+        updatedAt: new Date()
       });
 
-      alert("Job added successfully!");
+      alert("Job submitted successfully! It will be visible after admin approval.");
       navigate('/jobs');
     } catch (error) {
       console.error("Error adding job:", error);

@@ -1,43 +1,55 @@
-import React from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import HomePage from "../../pages/HomePage";
 import { db } from "../../firebaseConfig";
 
-class HomePageComponent extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      jobs: [],
-      searchQuery: "", // State for search input
-    };
-  }
+const HomePageComponent = () => {
+  const [jobs, setJobs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  getJobs = async () => {
-    const querySnapshot = await getDocs(collection(db, "jobs"));
-    const jobs = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    this.setState({ jobs });
+  const getJobs = async () => {
+    try {
+      // Only fetch approved jobs, or jobs without status (backward compatibility)
+      const jobsQuery = query(
+        collection(db, "jobs"),
+        where("status", "in", ["active", "approved"])
+      );
+
+      // Also get jobs without status field (old data)
+      const allJobsQuery = collection(db, "jobs");
+      const querySnapshot = await getDocs(allJobsQuery);
+
+      const jobsData = querySnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((job) => {
+          // Show jobs that are approved/active OR don't have a status field (old data)
+          return !job.status || job.status === "active" || job.status === "approved";
+        });
+
+      setJobs(jobsData);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
   };
 
-  async componentDidMount() {
-    this.getJobs();
-  }
+  useEffect(() => {
+    getJobs();
+  }, []);
 
-  handleSearch = (query) => {
-    this.setState({ searchQuery: query });
+  const handleSearch = (query) => {
+    setSearchQuery(query);
   };
 
-  render() {
-    return (
-      <HomePage
-        jobs={this.state.jobs}
-        searchQuery={this.state.searchQuery}
-        onSearch={this.handleSearch}
-      />
-    );
-  }
-}
+  return (
+    <HomePage
+      jobs={jobs}
+      searchQuery={searchQuery}
+      onSearch={handleSearch}
+    />
+  );
+};
 
 export default HomePageComponent;

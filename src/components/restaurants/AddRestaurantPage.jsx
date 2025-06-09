@@ -74,12 +74,53 @@ const AddRestaurantPage = () => {
       const imageUrl = formData.image || 'https://placehold.co/400x300/1976d2/white?text=Restaurant';
 
       await addDoc(collection(db, 'restaurants'), {
-        ...formData,
+        name: formData.name,
+        description: formData.description || "",
+        cuisine: formData.cuisine || "Persian",
+        category: "Restaurant",
+        location: {
+          address: formData.address,
+          city: formData.city,
+          province: "",
+          postalCode: "",
+          coordinates: {
+            lat: null,
+            lng: null
+          }
+        },
+        contact: {
+          phone: formData.phone || "",
+          email: "",
+          website: formData.website || ""
+        },
+        hours: {
+          monday: "",
+          tuesday: "",
+          wednesday: "",
+          thursday: "",
+          friday: "",
+          saturday: "",
+          sunday: ""
+        },
+        priceRange: formData.priceRange || "$$",
+        rating: parseFloat(formData.rating) || 0,
+        reviewCount: 0,
+        features: ["dine-in"],
+        paymentMethods: ["cash", "card"],
         image: imageUrl,
+        images: [],
+        menu: "",
+        status: "pending", // Requires admin approval
+        verified: false,
+        featured: false,
+        views: 0,
+        postedBy: "anonymous", // Will be updated when user auth is implemented
+        approvedBy: null,
         createdAt: new Date(),
+        updatedAt: new Date()
       });
 
-      alert('Restaurant added successfully!');
+      alert('Restaurant submitted successfully! It will be visible after admin approval.');
       navigate('/restaurants');
     } catch (error) {
       console.error('Error adding restaurant:', error);
