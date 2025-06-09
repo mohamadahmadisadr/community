@@ -24,16 +24,14 @@ function LoginComponent (props) {
       const idToken = credentialResponse.credential;
       try{
         const user = jwtDecode(idToken);
-        console.log(user);
         login(user);
-        console.log("User logged in:", user);
         navigate("/");
-        
+
       }catch (error) {
-        console.error("Error decoding token:", error);
+        // Handle error silently in production
       }
     }else{
-      console.error("No credential response received", credentialResponse);
+      // Handle error silently in production
     }
     
     

@@ -47,7 +47,7 @@ const EventsPage = () => {
         });
       setEvents(eventsData);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      // Handle error silently in production
     } finally {
       setLoading(false);
     }

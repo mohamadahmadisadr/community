@@ -39,6 +39,7 @@ import {
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
+import CommentsSection from '../common/CommentsSection';
 
 const RestaurantDetailPage = () => {
   const { id } = useParams();
@@ -47,21 +48,14 @@ const RestaurantDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('RestaurantDetailPage: Component mounted with ID:', id);
-    console.log('RestaurantDetailPage: Current URL:', window.location.href);
-
     const fetchRestaurant = async () => {
       try {
-        console.log('RestaurantDetailPage: Fetching restaurant with ID:', id);
         const restaurantDoc = await getDoc(doc(db, "restaurants", id));
         if (restaurantDoc.exists()) {
-          console.log('RestaurantDetailPage: Restaurant found:', restaurantDoc.data());
           setRestaurant({ id: restaurantDoc.id, ...restaurantDoc.data() });
-        } else {
-          console.error("RestaurantDetailPage: Restaurant not found for ID:", id);
         }
       } catch (error) {
-        console.error("RestaurantDetailPage: Error fetching restaurant:", error);
+        // Handle error silently in production
       } finally {
         setLoading(false);
       }
@@ -646,6 +640,24 @@ const RestaurantDetailPage = () => {
                   Share
                 </Button>
               </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Comments Section - Separate Card */}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              border: '2px solid #4ecdc420',
+              mt: 2
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <CommentsSection
+                itemId={id}
+                itemType="restaurant"
+                color="#4ecdc4"
+              />
             </CardContent>
           </Card>
         </Box>

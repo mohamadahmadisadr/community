@@ -31,7 +31,7 @@ const HomePageComponent = () => {
 
       setJobs(jobsData);
     } catch (error) {
-      console.error("Error fetching jobs:", error);
+      // Handle error silently in production
     }
   };
 

@@ -31,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
+import CommentsSection from '../common/CommentsSection';
 
 const EventDetailPage = () => {
   const { id } = useParams();
@@ -39,21 +40,14 @@ const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('EventDetailPage: Component mounted with ID:', id);
-    console.log('EventDetailPage: Current URL:', window.location.href);
-    
     const fetchEvent = async () => {
       try {
-        console.log('EventDetailPage: Fetching event with ID:', id);
         const eventDoc = await getDoc(doc(db, "events", id));
         if (eventDoc.exists()) {
-          console.log('EventDetailPage: Event found:', eventDoc.data());
           setEvent({ id: eventDoc.id, ...eventDoc.data() });
-        } else {
-          console.error("EventDetailPage: Event not found for ID:", id);
         }
       } catch (error) {
-        console.error("EventDetailPage: Error fetching event:", error);
+        // Handle error silently in production
       } finally {
         setLoading(false);
       }
@@ -62,7 +56,6 @@ const EventDetailPage = () => {
     if (id) {
       fetchEvent();
     } else {
-      console.error('EventDetailPage: No ID provided');
       setLoading(false);
     }
   }, [id]);
@@ -481,6 +474,24 @@ const EventDetailPage = () => {
                   Share
                 </Button>
               </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Comments Section - Separate Card */}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              border: '2px solid #ff6b6b20',
+              mt: 2
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <CommentsSection
+                itemId={id}
+                itemType="event"
+                color="#ff6b6b"
+              />
             </CardContent>
           </Card>
         </Box>

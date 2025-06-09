@@ -123,7 +123,6 @@ const AddRestaurantPage = () => {
       alert('Restaurant submitted successfully! It will be visible after admin approval.');
       navigate('/restaurants');
     } catch (error) {
-      console.error('Error adding restaurant:', error);
       alert('Failed to add restaurant. Please try again.');
     } finally {
       setLoading(false);

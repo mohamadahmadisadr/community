@@ -50,18 +50,14 @@ const ProfilePage = () => {
   });
 
   useEffect(() => {
-    console.log('ProfilePage: Component mounted, checking for Telegram data...');
-
     // Try to get real Telegram user data
     const updateTelegramData = () => {
       const telegramUserData = getTelegramUser();
 
       if (telegramUserData) {
-        console.log('Setting Telegram user data:', telegramUserData);
         setTelegramUser(telegramUserData);
         return true;
       } else {
-        console.log('No Telegram data available, keeping fallback data');
         return false;
       }
     };

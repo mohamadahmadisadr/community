@@ -88,7 +88,6 @@ const AddJobPage = () => {
       alert("Job submitted successfully! It will be visible after admin approval.");
       navigate('/jobs');
     } catch (error) {
-      console.error("Error adding job:", error);
       alert("Failed to add job. Please try again.");
     } finally {
       setLoading(false);

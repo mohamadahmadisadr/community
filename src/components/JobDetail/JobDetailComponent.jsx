@@ -29,6 +29,7 @@ import {
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
+import CommentsSection from '../common/CommentsSection';
 
 const JobDetailPage = () => {
   const { id } = useParams();
@@ -37,21 +38,14 @@ const JobDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('JobDetailPage: Component mounted with ID:', id);
-    console.log('JobDetailPage: Current URL:', window.location.href);
-
     const fetchJob = async () => {
       try {
-        console.log('JobDetailPage: Fetching job with ID:', id);
-        const jobDoc = await getDoc(doc(db, "jobs", id)); // Fetch job by ID from Firestore
+        const jobDoc = await getDoc(doc(db, "jobs", id));
         if (jobDoc.exists()) {
-          console.log('JobDetailPage: Job found:', jobDoc.data());
           setJob({ id: jobDoc.id, ...jobDoc.data() });
-        } else {
-          console.error("JobDetailPage: Job not found for ID:", id);
         }
       } catch (error) {
-        console.error("JobDetailPage: Error fetching job:", error);
+        // Handle error silently in production
       } finally {
         setLoading(false);
       }
@@ -60,7 +54,6 @@ const JobDetailPage = () => {
     if (id) {
       fetchJob();
     } else {
-      console.error('JobDetailPage: No ID provided');
       setLoading(false);
     }
   }, [id]);
@@ -550,6 +543,24 @@ const JobDetailPage = () => {
                   Share
                 </Button>
               </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Comments Section - Separate Card */}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              border: '2px solid #667eea20',
+              mt: 2
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <CommentsSection
+                itemId={id}
+                itemType="job"
+                color="#667eea"
+              />
             </CardContent>
           </Card>
         </Box>

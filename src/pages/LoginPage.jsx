@@ -34,7 +34,7 @@ const LoginPage = (props) => {
         <GoogleLogin
           onSuccess={props.handleGoogleLogin}
           onError={() => {
-            console.log("Login Failed");
+            // Handle login failure silently
           }}/>
           </div>
 

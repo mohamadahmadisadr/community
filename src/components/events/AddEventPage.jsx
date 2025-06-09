@@ -106,7 +106,6 @@ const AddEventPage = () => {
       alert('Event submitted successfully! It will be visible after admin approval.');
       navigate('/events');
     } catch (error) {
-      console.error('Error adding event:', error);
       alert('Failed to add event. Please try again.');
     } finally {
       setLoading(false);

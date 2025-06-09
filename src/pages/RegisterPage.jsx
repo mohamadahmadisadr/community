@@ -6,11 +6,11 @@ import Footer from "./MyFooter";
 
 const RegisterPage = () => {
   const handleGoogleRegister = () => {
-    console.log("Google register clicked");
+    // Handle Google register
   };
 
   const handleNavigateToLogin = () => {
-    console.log("Navigate to login page");
+    // Handle navigation to login
   };
 
   return (

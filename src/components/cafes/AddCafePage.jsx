@@ -144,7 +144,6 @@ const AddCafePage = () => {
       alert('Café submitted successfully! It will be visible after admin approval.');
       navigate('/cafes');
     } catch (error) {
-      console.error('Error adding café:', error);
       alert('Failed to add café. Please try again.');
     } finally {
       setLoading(false);
