@@ -29,8 +29,11 @@ import {
 } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
 import { getTelegramUser } from '../../utils/telegramInit';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ProfilePage = () => {
+  const { themeMode, toggleTheme, isDark, theme } = useTheme();
+
   // Initialize with fallback data immediately
   const [telegramUser, setTelegramUser] = useState({
     id: '123456789',
@@ -45,7 +48,6 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false); // Start with false since we have fallback data
   const [settings, setSettings] = useState({
     notifications: true,
-    darkMode: false,
     language: 'en'
   });
 
@@ -105,19 +107,9 @@ const ProfilePage = () => {
     <AppBarLayout
       title="Profile"
       icon={<Person />}
-      gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-      iconColor="#667eea"
     >
       {/* User Profile Card */}
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          border: '2px solid #667eea20',
-          mb: 3,
-          background: 'linear-gradient(135deg, #667eea10 0%, #764ba210 100%)'
-        }}
-      >
+      <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Avatar
@@ -126,7 +118,7 @@ const ProfilePage = () => {
                 width: 80,
                 height: 80,
                 mr: 3,
-                bgcolor: '#667eea',
+                bgcolor: theme.palette.primary.main,
                 fontSize: '2rem',
                 fontWeight: 'bold'
               }}
@@ -134,7 +126,7 @@ const ProfilePage = () => {
               {!telegramUser?.photoUrl && getInitials(telegramUser?.firstName, telegramUser?.lastName)}
             </Avatar>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, color: '#2c3e50' }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, color: theme.palette.text.primary }}>
                 {telegramUser?.firstName || 'Unknown'} {telegramUser?.lastName || ''}
               </Typography>
               {telegramUser?.username && (
@@ -148,11 +140,11 @@ const ProfilePage = () => {
                   label={`ID: ${telegramUser?.id || 'Unknown'}`}
                   size="small"
                   sx={{
-                    bgcolor: '#0088cc',
-                    color: 'white',
+                    bgcolor: theme.palette.info.main,
+                    color: theme.palette.info.contrastText,
                     fontWeight: 'bold',
                     '& .MuiChip-icon': {
-                      color: 'white'
+                      color: theme.palette.info.contrastText
                     }
                   }}
                 />
@@ -161,8 +153,8 @@ const ProfilePage = () => {
                     label="Premium"
                     size="small"
                     sx={{
-                      bgcolor: '#ffd700',
-                      color: '#000',
+                      bgcolor: theme.palette.warning.main,
+                      color: theme.palette.warning.contrastText,
                       fontWeight: 'bold'
                     }}
                   />
@@ -173,10 +165,10 @@ const ProfilePage = () => {
                   size="small"
                   variant="outlined"
                   sx={{
-                    borderColor: '#667eea',
-                    color: '#667eea',
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     '& .MuiChip-icon': {
-                      color: '#667eea'
+                      color: theme.palette.primary.main
                     }
                   }}
                 />
@@ -187,23 +179,16 @@ const ProfilePage = () => {
       </Card>
 
       {/* Account Information */}
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          border: '2px solid #4ecdc420',
-          mb: 3
-        }}
-      >
+      <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
             Account Information
           </Typography>
 
           <List sx={{ p: 0 }}>
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Person sx={{ color: '#667eea' }} />
+                <Person sx={{ color: theme.palette.primary.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Full Name"
@@ -213,7 +198,7 @@ const ProfilePage = () => {
 
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Telegram sx={{ color: '#0088cc' }} />
+                <Telegram sx={{ color: theme.palette.info.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Username"
@@ -223,7 +208,7 @@ const ProfilePage = () => {
 
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Language sx={{ color: '#4ecdc4' }} />
+                <Language sx={{ color: theme.palette.success.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Language"
@@ -233,7 +218,7 @@ const ProfilePage = () => {
 
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Phone sx={{ color: '#96ceb4' }} />
+                <Phone sx={{ color: theme.palette.secondary.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Messages"
@@ -245,23 +230,16 @@ const ProfilePage = () => {
       </Card>
 
       {/* App Settings */}
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          border: '2px solid #ff6b6b20',
-          mb: 3
-        }}
-      >
+      <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
             App Settings
           </Typography>
 
           <List sx={{ p: 0 }}>
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Notifications sx={{ color: '#ff6b6b' }} />
+                <Notifications sx={{ color: theme.palette.error.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Notifications"
@@ -283,7 +261,7 @@ const ProfilePage = () => {
 
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Palette sx={{ color: '#96ceb4' }} />
+                <Palette sx={{ color: theme.palette.secondary.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Dark Mode"
@@ -292,8 +270,8 @@ const ProfilePage = () => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={settings.darkMode}
-                    onChange={handleSettingChange('darkMode')}
+                    checked={isDark}
+                    onChange={toggleTheme}
                     color="primary"
                   />
                 }
@@ -305,22 +283,16 @@ const ProfilePage = () => {
       </Card>
 
       {/* App Information */}
-      <Card
-        sx={{
-          borderRadius: 4,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          border: '2px solid #ffeaa720',
-        }}
-      >
+      <Card>
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
             About App
           </Typography>
 
           <List sx={{ p: 0 }}>
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Info sx={{ color: '#ffeaa7' }} />
+                <Info sx={{ color: theme.palette.info.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Iranian Community Canada"
@@ -330,7 +302,7 @@ const ProfilePage = () => {
 
             <ListItem sx={{ px: 0 }}>
               <ListItemIcon>
-                <Schedule sx={{ color: '#dda0dd' }} />
+                <Schedule sx={{ color: theme.palette.secondary.main }} />
               </ListItemIcon>
               <ListItemText
                 primary="Version"

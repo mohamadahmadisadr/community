@@ -61,57 +61,35 @@ const BottomNavigation = () => {
       <MuiBottomNavigation
         value={getCurrentTab()}
         onChange={handleChange}
+        showLabels={true} // Always show labels
         sx={{
-          height: 64,
+          height: 80,
           '& .MuiBottomNavigationAction-root': {
             minWidth: 'auto',
-            padding: '6px 12px 8px',
+            padding: '8px 12px',
           },
           '& .MuiBottomNavigationAction-label': {
             fontSize: '0.75rem',
             fontWeight: 500,
+            opacity: '1 !important', // Always show labels
           }
         }}
       >
         <BottomNavigationAction
           label="Jobs"
           icon={<Work />}
-          sx={{
-            color: '#667eea',
-            '&.Mui-selected': {
-              color: '#667eea'
-            }
-          }}
         />
         <BottomNavigationAction
           label="Events"
           icon={<Event />}
-          sx={{
-            color: '#ff6b6b',
-            '&.Mui-selected': {
-              color: '#ff6b6b'
-            }
-          }}
         />
         <BottomNavigationAction
           label="Dining"
           icon={<Restaurant />}
-          sx={{
-            color: '#4ecdc4',
-            '&.Mui-selected': {
-              color: '#4ecdc4'
-            }
-          }}
         />
         <BottomNavigationAction
           label="Profile"
           icon={<Person />}
-          sx={{
-            color: '#96ceb4',
-            '&.Mui-selected': {
-              color: '#96ceb4'
-            }
-          }}
         />
       </MuiBottomNavigation>
     </Paper>

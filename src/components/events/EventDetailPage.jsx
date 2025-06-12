@@ -32,12 +32,14 @@ import {
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
 import CommentsSection from '../common/CommentsSection';
+import { useTheme } from '@mui/material/styles';
 
 const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -113,8 +115,6 @@ const EventDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -147,8 +147,6 @@ const EventDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -171,14 +169,14 @@ const EventDetailPage = () => {
         <Container maxWidth={false} sx={{ pt: 4, pb: 2, px: 2, m: 0, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Box sx={{ textAlign: 'center' }}>
             <Avatar sx={{ 
-              bgcolor: '#f8f9fa', 
+              bgcolor: 'background.paper', 
               width: 80, 
               height: 80, 
               mx: 'auto', 
               mb: 2,
-              border: '3px solid #e9ecef'
+              border: `3px solid ${theme.palette.divider}`
             }}>
-              <Event sx={{ fontSize: 40, color: '#6c757d' }} />
+              <Event sx={{ fontSize: 40, color: theme.palette.text.secondary }} />
             </Avatar>
             <Typography variant="h5" color="error" sx={{ fontWeight: 'bold', mb: 1 }}>
               Event Not Found
@@ -193,13 +191,11 @@ const EventDetailPage = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* AppBar with event title */}
       <AppBar
         position="static"
         sx={{
-          background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           m: 0,
           p: 0
         }}
@@ -213,7 +209,7 @@ const EventDetailPage = () => {
           >
             <ArrowBack />
           </IconButton>
-          <Avatar sx={{ bgcolor: '#fff', color: '#ff6b6b', mr: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white', mr: 2 }}>
             <Event />
           </Avatar>
           <Typography 
@@ -235,31 +231,33 @@ const EventDetailPage = () => {
       </AppBar>
 
       <Container maxWidth={false} sx={{ pt: 0, pb: 10, px: 0, m: 0, flex: 1 }}>
-        {/* Event Image */}
-        {event.image && (
+        {/* Event Image or Placeholder */}
+        {event.image ? (
           <CardMedia
             component="img"
             height="250"
             image={event.image}
             alt={event.title}
-            sx={{ 
-              objectFit: "cover",
-              filter: 'brightness(0.9)'
+            sx={{
+              objectFit: "cover"
             }}
           />
-        )}
-
-        {/* Event Details Card */}
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Card
+        ) : (
+          <Box
             sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #ff6b6b20',
-              mb: 2
+              height: 250,
+              backgroundColor: 'grey.100',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <Event sx={{ fontSize: 80, color: 'grey.400' }} />
+          </Box>
+        )}
+
+        {/* Event Details */}
+        <Box sx={{ px: 2, pt: 2 }}>
               {/* Event Title */}
               <Typography
                 variant="h5"
@@ -268,7 +266,7 @@ const EventDetailPage = () => {
                   mb: 2,
                   textAlign: getTextDirection(event.title) === "rtl" ? "right" : "left",
                   fontFamily: getFontFamily(event.title),
-                  color: '#2c3e50'
+                  color: theme.palette.text.primary
                 }}
               >
                 {event.title}
@@ -279,11 +277,8 @@ const EventDetailPage = () => {
                 {event.category && (
                   <Chip
                     label={event.category}
-                    sx={{
-                      bgcolor: '#ff6b6b15',
-                      color: '#ff6b6b',
-                      fontWeight: 'bold'
-                    }}
+                    variant="outlined"
+                    color="primary"
                   />
                 )}
                 {event.price && (
@@ -291,13 +286,7 @@ const EventDetailPage = () => {
                     icon={<AttachMoney />}
                     label={event.price === 'Free' ? 'Free' : `$${event.price}`}
                     variant="outlined"
-                    sx={{
-                      borderColor: event.price === 'Free' ? '#28a745' : '#ff6b6b',
-                      color: event.price === 'Free' ? '#28a745' : '#ff6b6b',
-                      '& .MuiChip-icon': {
-                        color: event.price === 'Free' ? '#28a745' : '#ff6b6b'
-                      }
-                    }}
+                    color="secondary"
                   />
                 )}
                 {event.createdAt && (
@@ -306,13 +295,7 @@ const EventDetailPage = () => {
                     label={new Date(event.createdAt.seconds * 1000).toLocaleDateString()}
                     size="small"
                     variant="outlined"
-                    sx={{
-                      borderColor: '#6c757d',
-                      color: '#6c757d',
-                      '& .MuiChip-icon': {
-                        color: '#6c757d'
-                      }
-                    }}
+                    color="secondary"
                   />
                 )}
               </Box>
@@ -321,7 +304,7 @@ const EventDetailPage = () => {
 
               {/* Event Information */}
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                   Event Information
                 </Typography>
                 
@@ -332,10 +315,10 @@ const EventDetailPage = () => {
                       label={formatDate(event.date)}
                       variant="outlined"
                       sx={{
-                        borderColor: '#ff6b6b',
-                        color: '#ff6b6b',
+                        borderColor: theme.palette.primary.main,
+                        color: theme.palette.primary.main,
                         '& .MuiChip-icon': {
-                          color: '#ff6b6b'
+                          color: theme.palette.primary.main
                         }
                       }}
                     />
@@ -349,10 +332,10 @@ const EventDetailPage = () => {
                       label={formatTime(event.time)}
                       variant="outlined"
                       sx={{
-                        borderColor: '#17a2b8',
-                        color: '#17a2b8',
+                        borderColor: theme.palette.info.main,
+                        color: theme.palette.info.main,
                         '& .MuiChip-icon': {
-                          color: '#17a2b8'
+                          color: theme.palette.info.main
                         }
                       }}
                     />
@@ -366,17 +349,17 @@ const EventDetailPage = () => {
                       label={event.location}
                       variant="outlined"
                       sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
+                        borderColor: theme.palette.text.secondary,
+                        color: theme.palette.text.secondary,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#6c757d'
+                          color: theme.palette.text.secondary
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#6c757d10'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(108, 117, 125, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('address', event.location)}
@@ -391,10 +374,10 @@ const EventDetailPage = () => {
                       label={`Organized by ${event.organizer}`}
                       variant="outlined"
                       sx={{
-                        borderColor: '#6f42c1',
-                        color: '#6f42c1',
+                        borderColor: theme.palette.secondary.main,
+                        color: theme.palette.secondary.main,
                         '& .MuiChip-icon': {
-                          color: '#6f42c1'
+                          color: theme.palette.secondary.main
                         }
                       }}
                     />
@@ -406,7 +389,7 @@ const EventDetailPage = () => {
               {event.description && (
                 <>
                   <Divider sx={{ mb: 3 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     About This Event
                   </Typography>
                   <Typography
@@ -439,12 +422,12 @@ const EventDetailPage = () => {
                       fontWeight: "bold",
                       textTransform: "none",
                       borderRadius: 3,
-                      background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-                      boxShadow: '0 4px 20px rgba(255, 107, 107, 0.3)',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                      boxShadow: theme.shadows[4],
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #ff5252 0%, #d84315 100%)',
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.dark} 100%)`,
                         transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 25px rgba(255, 107, 107, 0.4)',
+                        boxShadow: theme.shadows[6],
                       }
                     }}
                   >
@@ -462,11 +445,11 @@ const EventDetailPage = () => {
                     fontWeight: "bold",
                     textTransform: "none",
                     borderRadius: 3,
-                    borderColor: '#ff6b6b',
-                    color: '#ff6b6b',
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     '&:hover': {
-                      borderColor: '#ff5252',
-                      backgroundColor: '#ff6b6b10',
+                      borderColor: theme.palette.primary.dark,
+                      backgroundColor: 'rgba(255, 107, 107, 0.1)',
                       transform: 'translateY(-2px)',
                     }
                   }}
@@ -474,26 +457,12 @@ const EventDetailPage = () => {
                   Share
                 </Button>
               </Stack>
-            </CardContent>
-          </Card>
 
-          {/* Comments Section - Separate Card */}
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #ff6b6b20',
-              mt: 2
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
+              {/* Comments Section */}
               <CommentsSection
                 itemId={id}
                 itemType="event"
-                color="#ff6b6b"
               />
-            </CardContent>
-          </Card>
         </Box>
       </Container>
     </Box>

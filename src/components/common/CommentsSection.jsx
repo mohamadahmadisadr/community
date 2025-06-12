@@ -25,12 +25,12 @@ import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp 
 import { db } from '../../firebaseConfig';
 import { isTelegramWebApp, getTelegramUser, showTelegramAlert } from '../../utils/telegramUtils';
 
-const CommentsSection = ({ itemId, itemType, color = '#667eea' }) => {
+const CommentsSection = ({ itemId, itemType }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(true); // Always show comments section
   const [loading, setLoading] = useState(false);
-  const [showAddComment, setShowAddComment] = useState(false);
+
   const [showAllComments, setShowAllComments] = useState(false);
 
   const INITIAL_COMMENTS_COUNT = 3; // Show first 3 comments initially
@@ -125,203 +125,102 @@ const CommentsSection = ({ itemId, itemType, color = '#667eea' }) => {
     <Box sx={{ mt: 3 }}>
       {/* Comments Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <Comment sx={{ color, fontSize: 28 }} />
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2c3e50' }}>
+        <Comment sx={{ fontSize: 28 }} />
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           Comments
         </Typography>
         {comments.length > 0 && (
           <Chip
             label={comments.length}
             size="small"
-            sx={{
-              bgcolor: `${color}15`,
-              color: color,
-              fontWeight: 'bold',
-              minWidth: 32
-            }}
+            color="primary"
           />
         )}
       </Box>
 
       {/* Add Comment Section */}
-      <Card sx={{ mb: 3, border: `1px solid ${color}20`, borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-        <CardContent sx={{ pb: 2 }}>
-          {!showAddComment ? (
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          multiline
+          rows={3}
+          placeholder={canAddComments() ? "Share your thoughts..." : "You must be using the Telegram app to add comments"}
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          disabled={!canAddComments() || loading}
+          sx={{ mb: 2 }}
+        />
+
+        {canAddComments() && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <Button
               variant="contained"
-              startIcon={<Comment />}
-              onClick={() => {
-                if (canAddComments()) {
-                  setShowAddComment(true);
-                } else {
-                  showTelegramAlert('You must be using the Telegram app to add comments');
-                }
-              }}
-              sx={{
-                background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 'bold',
-                px: 3,
-                py: 1,
-                '&:hover': {
-                  background: `linear-gradient(135deg, ${color}dd 0%, ${color}bb 100%)`,
-                  transform: 'translateY(-1px)',
-                  boxShadow: `0 4px 12px ${color}40`
-                }
-              }}
+              startIcon={<Send />}
+              onClick={handleAddComment}
+              disabled={!newComment.trim() || loading}
+              sx={{ textTransform: 'none' }}
             >
-              Write a comment
+              {loading ? 'Posting...' : 'Post Comment'}
             </Button>
-          ) : (
-              <Box>
-                {!canAddComments() && (
-                  <Alert
-                    severity="info"
-                    icon={<Telegram />}
-                    sx={{ mb: 2 }}
-                  >
-                    You must be using the Telegram app to add comments
-                  </Alert>
-                )}
-
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  placeholder="Share your thoughts..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  disabled={!canAddComments() || loading}
-                  sx={{
-                    mb: 2,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: color,
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: color,
-                      }
-                    }
-                  }}
-                />
-                
-                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      setShowAddComment(false);
-                      setNewComment('');
-                    }}
-                    disabled={loading}
-                    sx={{
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      borderColor: '#ccc',
-                      color: '#666',
-                      '&:hover': {
-                        borderColor: '#999',
-                        backgroundColor: '#f5f5f5'
-                      }
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="contained"
-                    startIcon={<Send />}
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim() || !canAddComments() || loading}
-                    sx={{
-                      background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        background: `linear-gradient(135deg, ${color}dd 0%, ${color}bb 100%)`,
-                        transform: 'translateY(-1px)',
-                        boxShadow: `0 4px 12px ${color}40`
-                      }
-                    }}
-                  >
-                    {loading ? 'Posting...' : 'Post Comment'}
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
+          </Box>
+        )}
+      </Box>
 
         {/* Comments List */}
         {comments.length > 0 ? (
           <Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {displayedComments.map((comment) => (
-                <Card
+                <Box
                   key={comment.id}
                   sx={{
-                    border: '1px solid #f0f0f0',
-                    borderRadius: 3,
-                    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      boxShadow: '0 2px 16px rgba(0,0,0,0.1)',
-                      transform: 'translateY(-1px)'
-                    }
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1
                   }}
                 >
-                  <CardContent sx={{ pb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                      <Avatar
-                        src={comment.userPhotoUrl}
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          bgcolor: color,
-                          border: `2px solid ${color}20`
-                        }}
-                      >
-                        {!comment.userPhotoUrl && <Person />}
-                      </Avatar>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                    <Avatar
+                      src={comment.userPhotoUrl}
+                      sx={{
+                        width: 40,
+                        height: 40
+                      }}
+                    >
+                      {!comment.userPhotoUrl && <Person />}
+                    </Avatar>
 
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#2c3e50' }}>
-                            {getUserDisplayName(comment)}
-                          </Typography>
-                          {comment.username && (
-                            <Chip
-                              label={`@${comment.username}`}
-                              size="small"
-                              sx={{
-                                bgcolor: `${color}15`,
-                                color: color,
-                                fontSize: '0.7rem',
-                                height: 20,
-                                fontWeight: 'bold'
-                              }}
-                            />
-                          )}
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-                            {formatDate(comment.createdAt)}
-                          </Typography>
-                        </Box>
-
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            lineHeight: 1.6,
-                            color: '#444',
-                            fontSize: '0.95rem'
-                          }}
-                        >
-                          {comment.text}
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                          {getUserDisplayName(comment)}
+                        </Typography>
+                        {comment.username && (
+                          <Chip
+                            label={`@${comment.username}`}
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            sx={{ fontSize: '0.7rem', height: 20 }}
+                          />
+                        )}
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
+                          {formatDate(comment.createdAt)}
                         </Typography>
                       </Box>
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          lineHeight: 1.6
+                        }}
+                      >
+                        {comment.text}
+                      </Typography>
                     </Box>
-                  </CardContent>
-                </Card>
+                  </Box>
+                </Box>
               ))}
             </Box>
 
@@ -331,22 +230,7 @@ const CommentsSection = ({ itemId, itemType, color = '#667eea' }) => {
                 <Button
                   variant="outlined"
                   onClick={() => setShowAllComments(true)}
-                  sx={{
-                    borderColor: color,
-                    color: color,
-                    borderRadius: 3,
-                    px: 4,
-                    py: 1,
-                    textTransform: 'none',
-                    fontWeight: 'bold',
-                    fontSize: '0.95rem',
-                    '&:hover': {
-                      borderColor: color,
-                      backgroundColor: `${color}08`,
-                      transform: 'translateY(-1px)',
-                      boxShadow: `0 4px 12px ${color}30`
-                    }
-                  }}
+                  sx={{ textTransform: 'none' }}
                 >
                   See {comments.length - INITIAL_COMMENTS_COUNT} more comments
                 </Button>
@@ -359,14 +243,7 @@ const CommentsSection = ({ itemId, itemType, color = '#667eea' }) => {
                 <Button
                   variant="text"
                   onClick={() => setShowAllComments(false)}
-                  sx={{
-                    color: '#666',
-                    textTransform: 'none',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5'
-                    }
-                  }}
+                  sx={{ textTransform: 'none' }}
                 >
                   Show less
                 </Button>
@@ -374,9 +251,9 @@ const CommentsSection = ({ itemId, itemType, color = '#667eea' }) => {
             )}
           </Box>
         ) : (
-          <Box sx={{ textAlign: 'center', py: 6, bgcolor: '#fafafa', borderRadius: 3 }}>
-            <Comment sx={{ fontSize: 48, color: '#ddd', mb: 2 }} />
-            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#999', mb: 1 }}>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Comment sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
               No comments yet
             </Typography>
             <Typography variant="body2" color="text.secondary">

@@ -40,12 +40,14 @@ import {
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
 import CommentsSection from '../common/CommentsSection';
+import { useTheme } from '@mui/material/styles';
 
 const RestaurantDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -107,8 +109,6 @@ const RestaurantDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -187,13 +187,11 @@ const RestaurantDetailPage = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* AppBar with restaurant name */}
       <AppBar
         position="static"
         sx={{
-          background: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           m: 0,
           p: 0
         }}
@@ -207,7 +205,7 @@ const RestaurantDetailPage = () => {
           >
             <ArrowBack />
           </IconButton>
-          <Avatar sx={{ bgcolor: '#fff', color: '#4ecdc4', mr: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white', mr: 2 }}>
             <Restaurant />
           </Avatar>
           <Typography
@@ -216,6 +214,7 @@ const RestaurantDetailPage = () => {
             sx={{
               flexGrow: 1,
               fontWeight: 'bold',
+              color: theme.palette.primary.contrastText, // Use theme for header title color
               textAlign: getTextDirection(restaurant.name) === "rtl" ? "right" : "left",
               fontFamily: getFontFamily(restaurant.name),
               overflow: 'hidden',
@@ -229,31 +228,33 @@ const RestaurantDetailPage = () => {
       </AppBar>
 
       <Container maxWidth={false} sx={{ pt: 0, pb: 10, px: 0, m: 0, flex: 1 }}>
-        {/* Restaurant Image */}
-        {restaurant.image && (
+        {/* Restaurant Image or Placeholder */}
+        {restaurant.image ? (
           <CardMedia
             component="img"
             height="250"
             image={restaurant.image}
             alt={restaurant.name}
             sx={{
-              objectFit: "cover",
-              filter: 'brightness(0.9)'
+              objectFit: "cover"
             }}
           />
-        )}
-
-        {/* Restaurant Details Card */}
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Card
+        ) : (
+          <Box
             sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #4ecdc420',
-              mb: 2
+              height: 250,
+              backgroundColor: 'grey.100',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <Restaurant sx={{ fontSize: 80, color: 'grey.400' }} />
+          </Box>
+        )}
+
+        {/* Restaurant Details */}
+        <Box sx={{ px: 2, pt: 2 }}>
               {/* Restaurant Name */}
               <Typography
                 variant="h5"
@@ -262,7 +263,7 @@ const RestaurantDetailPage = () => {
                   mb: 2,
                   textAlign: getTextDirection(restaurant.name) === "rtl" ? "right" : "left",
                   fontFamily: getFontFamily(restaurant.name),
-                  color: '#2c3e50'
+                  color: theme.palette.text.primary
                 }}
               >
                 {restaurant.name}
@@ -276,15 +277,8 @@ const RestaurantDetailPage = () => {
                     icon={<Star />}
                     label={restaurant.rating}
                     size="small"
-                    sx={{
-                      ml: 1,
-                      bgcolor: '#ffd700',
-                      color: '#000',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: '#000'
-                      }
-                    }}
+                    color="primary"
+                    sx={{ ml: 1 }}
                   />
                 </Box>
               )}
@@ -294,11 +288,8 @@ const RestaurantDetailPage = () => {
                 {restaurant.cuisine && restaurant.cuisine.trim() !== '' && (
                   <Chip
                     label={restaurant.cuisine}
-                    sx={{
-                      bgcolor: '#4ecdc415',
-                      color: '#4ecdc4',
-                      fontWeight: 'bold'
-                    }}
+                    variant="outlined"
+                    color="primary"
                   />
                 )}
                 {restaurant.priceRange && restaurant.priceRange.trim() !== '' && restaurant.priceRange !== '$$' && (
@@ -306,13 +297,7 @@ const RestaurantDetailPage = () => {
                     icon={<AttachMoney />}
                     label={restaurant.priceRange}
                     variant="outlined"
-                    sx={{
-                      borderColor: '#4ecdc4',
-                      color: '#4ecdc4',
-                      '& .MuiChip-icon': {
-                        color: '#4ecdc4'
-                      }
-                    }}
+                    color="secondary"
                   />
                 )}
                 {restaurant.createdAt && (
@@ -321,13 +306,7 @@ const RestaurantDetailPage = () => {
                     label={new Date(restaurant.createdAt.seconds * 1000).toLocaleDateString()}
                     size="small"
                     variant="outlined"
-                    sx={{
-                      borderColor: '#6c757d',
-                      color: '#6c757d',
-                      '& .MuiChip-icon': {
-                        color: '#6c757d'
-                      }
-                    }}
+                    color="secondary"
                   />
                 )}
               </Box>
@@ -336,7 +315,7 @@ const RestaurantDetailPage = () => {
 
               {/* Contact Information */}
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                   Contact Information
                 </Typography>
 
@@ -347,17 +326,17 @@ const RestaurantDetailPage = () => {
                       label={`${restaurant.location?.address || restaurant.address}, ${restaurant.location?.city || restaurant.city}`}
                       variant="outlined"
                       sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
+                        borderColor: theme.palette.text.secondary,
+                        color: theme.palette.text.secondary,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#6c757d'
+                          color: theme.palette.text.secondary
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#6c757d10'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(108, 117, 125, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('address', restaurant.location?.address || restaurant.address, restaurant.location?.city || restaurant.city)}
@@ -372,17 +351,17 @@ const RestaurantDetailPage = () => {
                       label={restaurant.contactInfo?.phone || restaurant.contact?.phone || restaurant.phone}
                       variant="outlined"
                       sx={{
-                        borderColor: '#4ecdc4',
-                        color: '#4ecdc4',
+                        borderColor: theme.palette.primary.main,
+                        color: theme.palette.primary.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#4ecdc4'
+                          color: theme.palette.primary.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#4ecdc410'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(78, 205, 196, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('phone', restaurant.contactInfo?.phone || restaurant.contact?.phone || restaurant.phone)}
@@ -397,17 +376,17 @@ const RestaurantDetailPage = () => {
                       label={restaurant.contact?.email || restaurant.contactInfo?.email}
                       variant="outlined"
                       sx={{
-                        borderColor: '#dc3545',
-                        color: '#dc3545',
+                        borderColor: theme.palette.error.main,
+                        color: theme.palette.error.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#dc3545'
+                          color: theme.palette.error.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#dc354510'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(220, 53, 69, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('email', restaurant.contact?.email || restaurant.contactInfo?.email)}
@@ -422,17 +401,17 @@ const RestaurantDetailPage = () => {
                       label="Visit Website"
                       variant="outlined"
                       sx={{
-                        borderColor: '#17a2b8',
-                        color: '#17a2b8',
+                        borderColor: theme.palette.info.main,
+                        color: theme.palette.info.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#17a2b8'
+                          color: theme.palette.info.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#17a2b810'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(23, 162, 184, 0.1)'
                         }
                       }}
                       onClick={() => window.open(restaurant.contact?.website || restaurant.contactInfo?.website, '_blank')}
@@ -446,7 +425,7 @@ const RestaurantDetailPage = () => {
               {/* Hours */}
               {restaurant.hours && Object.values(restaurant.hours).some(h => h && h.trim() !== '') && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Hours
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -461,11 +440,11 @@ const RestaurantDetailPage = () => {
                             label={hours}
                             size="small"
                             sx={{
-                              bgcolor: '#28a74515',
-                              color: '#28a745',
+                              bgcolor: 'rgba(40, 167, 69, 0.1)',
+                              color: theme.palette.success.main,
                               fontWeight: 'bold',
                               '& .MuiChip-icon': {
-                                color: '#28a745'
+                                color: theme.palette.success.main
                               }
                             }}
                           />
@@ -479,7 +458,7 @@ const RestaurantDetailPage = () => {
               {/* Features */}
               {restaurant.features && restaurant.features.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Features
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -489,11 +468,11 @@ const RestaurantDetailPage = () => {
                         icon={<Dining />}
                         label={feature.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         sx={{
-                          bgcolor: '#6f42c115',
-                          color: '#6f42c1',
+                          bgcolor: 'rgba(111, 66, 193, 0.1)',
+                          color: theme.palette.primary.main,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: '#6f42c1'
+                            color: theme.palette.primary.main
                           }
                         }}
                       />
@@ -505,7 +484,7 @@ const RestaurantDetailPage = () => {
               {/* Payment Methods */}
               {restaurant.paymentMethods && restaurant.paymentMethods.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Payment Methods
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -515,11 +494,11 @@ const RestaurantDetailPage = () => {
                         icon={<Payment />}
                         label={method.replace(/\b\w/g, l => l.toUpperCase())}
                         sx={{
-                          bgcolor: '#fd7e1415',
-                          color: '#fd7e14',
+                          bgcolor: 'rgba(253, 126, 20, 0.1)',
+                          color: theme.palette.warning.main,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: '#fd7e14'
+                            color: theme.palette.warning.main
                           }
                         }}
                       />
@@ -535,7 +514,7 @@ const RestaurantDetailPage = () => {
                     icon={<CheckCircle />}
                     label="Verified"
                     sx={{
-                      bgcolor: '#28a745',
+                      bgcolor: theme.palette.success.main,
                       color: 'white',
                       fontWeight: 'bold',
                       '& .MuiChip-icon': {
@@ -549,7 +528,7 @@ const RestaurantDetailPage = () => {
                     icon={<Star />}
                     label="Featured"
                     sx={{
-                      bgcolor: '#ffd700',
+                      bgcolor: 'rgba(255, 215, 0, 0.1)',
                       color: '#000',
                       fontWeight: 'bold',
                       '& .MuiChip-icon': {
@@ -563,8 +542,8 @@ const RestaurantDetailPage = () => {
                     label={restaurant.status.replace(/\b\w/g, l => l.toUpperCase())}
                     size="small"
                     sx={{
-                      bgcolor: restaurant.status === 'approved' ? '#28a74515' : '#6c757d15',
-                      color: restaurant.status === 'approved' ? '#28a745' : '#6c757d',
+                      bgcolor: restaurant.status === 'approved' ? 'rgba(40, 167, 69, 0.1)' : 'rgba(108, 117, 125, 0.1)',
+                      color: restaurant.status === 'approved' ? theme.palette.success.main : theme.palette.text.secondary,
                       fontWeight: 'bold'
                     }}
                   />
@@ -601,17 +580,7 @@ const RestaurantDetailPage = () => {
                     sx={{
                       py: 1.5,
                       px: 3,
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-                      boxShadow: '0 4px 20px rgba(78, 205, 196, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #26d0ce 0%, #3a8b7a 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 25px rgba(78, 205, 196, 0.4)',
-                      }
+                      fontSize: "1rem"
                     }}
                   >
                     Call Now
@@ -628,11 +597,11 @@ const RestaurantDetailPage = () => {
                     fontWeight: "bold",
                     textTransform: "none",
                     borderRadius: 3,
-                    borderColor: '#4ecdc4',
-                    color: '#4ecdc4',
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
                     '&:hover': {
                       borderColor: '#26d0ce',
-                      backgroundColor: '#4ecdc410',
+                      backgroundColor: 'rgba(78, 205, 196, 0.1)',
                       transform: 'translateY(-2px)',
                     }
                   }}
@@ -640,26 +609,12 @@ const RestaurantDetailPage = () => {
                   Share
                 </Button>
               </Stack>
-            </CardContent>
-          </Card>
 
-          {/* Comments Section - Separate Card */}
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #4ecdc420',
-              mt: 2
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
+              {/* Comments Section */}
               <CommentsSection
                 itemId={id}
                 itemType="restaurant"
-                color="#4ecdc4"
               />
-            </CardContent>
-          </Card>
         </Box>
       </Container>
     </Box>

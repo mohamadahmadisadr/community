@@ -42,12 +42,14 @@ import {
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
 import CommentsSection from '../common/CommentsSection';
+import { useTheme } from '@mui/material/styles';
 
 const CafeDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [cafe, setCafe] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchCafe = async () => {
@@ -108,8 +110,6 @@ const CafeDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -142,8 +142,6 @@ const CafeDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -188,13 +186,11 @@ const CafeDetailPage = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* AppBar with cafe name */}
       <AppBar
         position="static"
         sx={{
-          background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           m: 0,
           p: 0
         }}
@@ -208,7 +204,7 @@ const CafeDetailPage = () => {
           >
             <ArrowBack />
           </IconButton>
-          <Avatar sx={{ bgcolor: '#fff', color: '#96ceb4', mr: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white', mr: 2 }}>
             <LocalCafe />
           </Avatar>
           <Typography
@@ -230,31 +226,33 @@ const CafeDetailPage = () => {
       </AppBar>
 
       <Container maxWidth={false} sx={{ pt: 0, pb: 10, px: 0, m: 0, flex: 1 }}>
-        {/* Cafe Image */}
-        {cafe.image && (
+        {/* Cafe Image or Placeholder */}
+        {cafe.image ? (
           <CardMedia
             component="img"
             height="250"
             image={cafe.image}
             alt={cafe.name}
             sx={{
-              objectFit: "cover",
-              filter: 'brightness(0.9)'
+              objectFit: "cover"
             }}
           />
-        )}
-
-        {/* Cafe Details Card */}
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Card
+        ) : (
+          <Box
             sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #96ceb420',
-              mb: 2
+              height: 250,
+              backgroundColor: 'grey.100',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <LocalCafe sx={{ fontSize: 80, color: 'grey.400' }} />
+          </Box>
+        )}
+
+        {/* Cafe Details */}
+        <Box sx={{ px: 2, pt: 2 }}>
               {/* Cafe Name */}
               <Typography
                 variant="h5"
@@ -263,7 +261,7 @@ const CafeDetailPage = () => {
                   mb: 2,
                   textAlign: getTextDirection(cafe.name) === "rtl" ? "right" : "left",
                   fontFamily: getFontFamily(cafe.name),
-                  color: '#2c3e50'
+                  color: theme.palette.text.primary
                 }}
               >
                 {cafe.name}
@@ -277,15 +275,8 @@ const CafeDetailPage = () => {
                     icon={<Star />}
                     label={cafe.rating}
                     size="small"
-                    sx={{
-                      ml: 1,
-                      bgcolor: '#ffd700',
-                      color: '#000',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: '#000'
-                      }
-                    }}
+                    color="primary"
+                    sx={{ ml: 1 }}
                   />
                 </Box>
               )}
@@ -296,8 +287,8 @@ const CafeDetailPage = () => {
                   <Chip
                     label={cafe.specialty}
                     sx={{
-                      bgcolor: '#96ceb415',
-                      color: '#96ceb4',
+                      bgcolor: theme.palette.success.light,
+                      color: theme.palette.success.main,
                       fontWeight: 'bold'
                     }}
                   />
@@ -308,10 +299,10 @@ const CafeDetailPage = () => {
                     label={cafe.priceRange}
                     variant="outlined"
                     sx={{
-                      borderColor: '#96ceb4',
-                      color: '#96ceb4',
+                      borderColor: theme.palette.success.main,
+                      color: theme.palette.success.main,
                       '& .MuiChip-icon': {
-                        color: '#96ceb4'
+                        color: theme.palette.success.main
                       }
                     }}
                   />
@@ -323,10 +314,10 @@ const CafeDetailPage = () => {
                     size="small"
                     variant="outlined"
                     sx={{
-                      borderColor: '#6c757d',
-                      color: '#6c757d',
+                      borderColor: theme.palette.text.secondary,
+                      color: theme.palette.text.secondary,
                       '& .MuiChip-icon': {
-                        color: '#6c757d'
+                        color: theme.palette.text.secondary
                       }
                     }}
                   />
@@ -337,7 +328,7 @@ const CafeDetailPage = () => {
 
               {/* Features */}
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                   Features
                 </Typography>
 
@@ -347,7 +338,7 @@ const CafeDetailPage = () => {
                       icon={<Wifi />}
                       label="WiFi"
                       sx={{
-                        bgcolor: '#17a2b8',
+                        bgcolor: theme.palette.info.main,
                         color: 'white',
                         fontWeight: 'bold',
                         '& .MuiChip-icon': {
@@ -360,7 +351,7 @@ const CafeDetailPage = () => {
                     <Chip
                       label="Outdoor Seating"
                       sx={{
-                        bgcolor: '#28a745',
+                        bgcolor: theme.palette.success.main,
                         color: 'white',
                         fontWeight: 'bold'
                       }}
@@ -371,7 +362,7 @@ const CafeDetailPage = () => {
                       icon={<DirectionsCar />}
                       label="Parking"
                       sx={{
-                        bgcolor: '#6f42c1',
+                        bgcolor: theme.palette.primary.main,
                         color: 'white',
                         fontWeight: 'bold',
                         '& .MuiChip-icon': {
@@ -385,7 +376,7 @@ const CafeDetailPage = () => {
                       icon={<Pets />}
                       label="Pet Friendly"
                       sx={{
-                        bgcolor: '#fd7e14',
+                        bgcolor: theme.palette.warning.main,
                         color: 'white',
                         fontWeight: 'bold',
                         '& .MuiChip-icon': {
@@ -401,7 +392,7 @@ const CafeDetailPage = () => {
 
               {/* Contact Information */}
               <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                   Contact Information
                 </Typography>
 
@@ -412,17 +403,17 @@ const CafeDetailPage = () => {
                       label={`${cafe.location?.address || cafe.address}, ${cafe.location?.city || cafe.city}`}
                       variant="outlined"
                       sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
+                        borderColor: theme.palette.text.secondary,
+                        color: theme.palette.text.secondary,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#6c757d'
+                          color: theme.palette.text.secondary
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#6c757d10'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(108, 117, 125, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('address', cafe.location?.address || cafe.address, cafe.location?.city || cafe.city)}
@@ -437,17 +428,17 @@ const CafeDetailPage = () => {
                       label={cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone}
                       variant="outlined"
                       sx={{
-                        borderColor: '#96ceb4',
-                        color: '#96ceb4',
+                        borderColor: theme.palette.success.main,
+                        color: theme.palette.success.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#96ceb4'
+                          color: theme.palette.success.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#96ceb410'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(150, 206, 180, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('phone', cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone)}
@@ -462,17 +453,17 @@ const CafeDetailPage = () => {
                       label={cafe.contact?.email || cafe.contactInfo?.email}
                       variant="outlined"
                       sx={{
-                        borderColor: '#dc3545',
-                        color: '#dc3545',
+                        borderColor: theme.palette.error.main,
+                        color: theme.palette.error.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#dc3545'
+                          color: theme.palette.error.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#dc354510'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(220, 53, 69, 0.1)'
                         }
                       }}
                       {...getClickableChipProps('email', cafe.contact?.email || cafe.contactInfo?.email)}
@@ -487,17 +478,17 @@ const CafeDetailPage = () => {
                       label="Visit Website"
                       variant="outlined"
                       sx={{
-                        borderColor: '#17a2b8',
-                        color: '#17a2b8',
+                        borderColor: theme.palette.info.main,
+                        color: theme.palette.info.main,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
-                          color: '#17a2b8'
+                          color: theme.palette.info.main
                         },
                         '&:hover': {
                           transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#17a2b810'
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(23, 162, 184, 0.1)'
                         }
                       }}
                       onClick={() => window.open(cafe.contact?.website || cafe.contactInfo?.website, '_blank')}
@@ -511,7 +502,7 @@ const CafeDetailPage = () => {
               {/* Hours */}
               {cafe.hours && Object.values(cafe.hours).some(h => h && h.trim() !== '') && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Hours
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -526,11 +517,11 @@ const CafeDetailPage = () => {
                             label={hours}
                             size="small"
                             sx={{
-                              bgcolor: '#28a74515',
-                              color: '#28a745',
+                              bgcolor: theme.palette.success.light,
+                              color: theme.palette.success.main,
                               fontWeight: 'bold',
                               '& .MuiChip-icon': {
-                                color: '#28a745'
+                                color: theme.palette.success.main
                               }
                             }}
                           />
@@ -544,23 +535,23 @@ const CafeDetailPage = () => {
               {/* Features */}
               {cafe.features && cafe.features.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Features & Amenities
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {cafe.features.map((feature, index) => {
                       let icon = <Dining />;
-                      let color = '#6f42c1';
+                      let color = theme.palette.primary.main;
 
                       if (feature.toLowerCase().includes('wifi')) {
                         icon = <Wifi />;
-                        color = '#17a2b8';
+                        color = theme.palette.info.main;
                       } else if (feature.toLowerCase().includes('parking')) {
                         icon = <DirectionsCar />;
-                        color = '#6f42c1';
+                        color = theme.palette.primary.main;
                       } else if (feature.toLowerCase().includes('pet')) {
                         icon = <Pets />;
-                        color = '#fd7e14';
+                        color = theme.palette.warning.main;
                       }
 
                       return (
@@ -586,7 +577,7 @@ const CafeDetailPage = () => {
               {/* Payment Methods */}
               {cafe.paymentMethods && cafe.paymentMethods.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Payment Methods
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -596,11 +587,11 @@ const CafeDetailPage = () => {
                         icon={<Payment />}
                         label={method.replace(/\b\w/g, l => l.toUpperCase())}
                         sx={{
-                          bgcolor: '#fd7e1415',
-                          color: '#fd7e14',
+                          bgcolor: theme.palette.warning.light,
+                          color: theme.palette.warning.main,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: '#fd7e14'
+                            color: theme.palette.warning.main
                           }
                         }}
                       />
@@ -616,7 +607,7 @@ const CafeDetailPage = () => {
                     icon={<CheckCircle />}
                     label="Verified"
                     sx={{
-                      bgcolor: '#28a745',
+                      bgcolor: theme.palette.success.main,
                       color: 'white',
                       fontWeight: 'bold',
                       '& .MuiChip-icon': {
@@ -644,8 +635,8 @@ const CafeDetailPage = () => {
                     label={cafe.status.replace(/\b\w/g, l => l.toUpperCase())}
                     size="small"
                     sx={{
-                      bgcolor: cafe.status === 'approved' ? '#28a74515' : '#6c757d15',
-                      color: cafe.status === 'approved' ? '#28a745' : '#6c757d',
+                      bgcolor: cafe.status === 'approved' ? theme.palette.success.light : theme.palette.text.disabled,
+                      color: cafe.status === 'approved' ? theme.palette.success.main : theme.palette.text.secondary,
                       fontWeight: 'bold'
                     }}
                   />
@@ -709,11 +700,11 @@ const CafeDetailPage = () => {
                     fontWeight: "bold",
                     textTransform: "none",
                     borderRadius: 3,
-                    borderColor: '#96ceb4',
-                    color: '#96ceb4',
+                    borderColor: theme.palette.success.main,
+                    color: theme.palette.success.main,
                     '&:hover': {
                       borderColor: '#74b9a0',
-                      backgroundColor: '#96ceb410',
+                      backgroundColor: 'rgba(150, 206, 180, 0.1)',
                       transform: 'translateY(-2px)',
                     }
                   }}
@@ -721,26 +712,12 @@ const CafeDetailPage = () => {
                   Share
                 </Button>
               </Stack>
-            </CardContent>
-          </Card>
 
-          {/* Comments Section - Separate Card */}
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #96ceb420',
-              mt: 2
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
+              {/* Comments Section */}
               <CommentsSection
                 itemId={id}
                 itemType="cafe"
-                color="#96ceb4"
               />
-            </CardContent>
-          </Card>
         </Box>
       </Container>
     </Box>

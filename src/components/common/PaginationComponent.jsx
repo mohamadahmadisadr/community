@@ -4,7 +4,8 @@ import {
   Typography, 
   Pagination,
   Stack,
-  Chip
+  Chip,
+  useTheme
 } from '@mui/material';
 import { 
   KeyboardArrowLeft, 
@@ -24,8 +25,9 @@ const PaginationComponent = ({
   endIndex,
   showLoadMore = true,
   showPagination = true,
-  color = '#667eea'
 }) => {
+  const theme = useTheme();
+
   if (totalPages <= 1) return null;
 
   return (
@@ -36,8 +38,8 @@ const PaginationComponent = ({
           label={`Showing ${startIndex}-${endIndex} of ${totalItems} items`}
           variant="outlined"
           sx={{
-            borderColor: color,
-            color: color,
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
             fontWeight: 'bold'
           }}
         />
@@ -54,15 +56,15 @@ const PaginationComponent = ({
               py: 1.5,
               px: 4,
               borderRadius: 3,
-              background: `linear-gradient(135deg, ${color} 0%, ${color}CC 100%)`,
-              boxShadow: `0 4px 20px ${color}40`,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main}CC 100%)`,
+              boxShadow: `0 4px 20px ${theme.palette.primary.main}40`,
               textTransform: 'none',
               fontSize: '1rem',
               fontWeight: 'bold',
               '&:hover': {
-                background: `linear-gradient(135deg, ${color}DD 0%, ${color}AA 100%)`,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}DD 0%, ${theme.palette.primary.main}AA 100%)`,
                 transform: 'translateY(-2px)',
-                boxShadow: `0 6px 25px ${color}50`,
+                boxShadow: `0 6px 25px ${theme.palette.primary.main}50`,
               }
             }}
           >
@@ -82,15 +84,15 @@ const PaginationComponent = ({
               disabled={!hasPrevPage}
               startIcon={<KeyboardArrowLeft />}
               sx={{
-                borderColor: color,
-                color: color,
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 '&:hover': {
-                  borderColor: color,
-                  backgroundColor: `${color}10`,
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: `${theme.palette.primary.main}10`,
                 },
                 '&:disabled': {
-                  borderColor: '#e0e0e0',
-                  color: '#bdbdbd',
+                  borderColor: theme.palette.divider,
+                  color: theme.palette.text.secondary,
                 }
               }}
             >
@@ -107,17 +109,17 @@ const PaginationComponent = ({
               showLastButton
               sx={{
                 '& .MuiPaginationItem-root': {
-                  color: color,
-                  borderColor: color,
+                  color: theme.palette.primary.main,
+                  borderColor: theme.palette.primary.main,
                   '&.Mui-selected': {
-                    backgroundColor: color,
+                    backgroundColor: theme.palette.primary.main,
                     color: 'white',
                     '&:hover': {
-                      backgroundColor: `${color}DD`,
+                      backgroundColor: `${theme.palette.primary.main}DD`,
                     }
                   },
                   '&:hover': {
-                    backgroundColor: `${color}10`,
+                    backgroundColor: `${theme.palette.primary.main}10`,
                   }
                 }
               }}
@@ -129,15 +131,15 @@ const PaginationComponent = ({
               disabled={!hasNextPage}
               endIcon={<KeyboardArrowRight />}
               sx={{
-                borderColor: color,
-                color: color,
+                borderColor: theme.palette.primary.main,
+                color: theme.palette.primary.main,
                 '&:hover': {
-                  borderColor: color,
-                  backgroundColor: `${color}10`,
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: `${theme.palette.primary.main}10`,
                 },
                 '&:disabled': {
-                  borderColor: '#e0e0e0',
-                  color: '#bdbdbd',
+                  borderColor: theme.palette.divider,
+                  color: theme.palette.text.secondary,
                 }
               }}
             >

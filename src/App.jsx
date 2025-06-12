@@ -2,9 +2,9 @@ import './App.css';
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { CustomThemeProvider } from './contexts/ThemeContext';
 import BaseLayout from './layouts/BaseLayout';
-import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material';
-import telegramTheme from './theme/telegramTheme';
+import { CssBaseline, CircularProgress, Box } from '@mui/material';
 
 // Lazy load components for better code splitting
 const LoginComponent = lazy(() => import('./components/LoginComponent'));
@@ -33,13 +33,13 @@ const LoadingFallback = () => (
       minHeight: '50vh'
     }}
   >
-    <CircularProgress size={60} sx={{ color: '#667eea' }} />
+    <CircularProgress size={60} sx={{ color: 'primary.main' }} />
   </Box>
 );
 
 function App() {
   return (
-    <ThemeProvider theme={telegramTheme}>
+    <CustomThemeProvider>
       <CssBaseline />
       <AuthProvider>
         <BaseLayout>
@@ -68,7 +68,7 @@ function App() {
           </Suspense>
         </BaseLayout>
       </AuthProvider>
-    </ThemeProvider>
+    </CustomThemeProvider>
   )
 }
 

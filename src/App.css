@@ -1,3 +1,6 @@
+/* Import Inter font for modern typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* Global reset */
 * {
   margin: 0;
@@ -11,8 +14,8 @@ html, body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-  /* Only fix background for Telegram mini app */
-  background-color: #ffffff !important;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -21,39 +24,120 @@ html, body {
   width: 100%;
   height: 100vh;
   overflow-x: hidden;
-  /* Only fix background */
-  background-color: #ffffff !important;
+  transition: background-color 0.3s ease;
 }
 
-/* Override Telegram's CSS variables - only background related */
+/* CSS custom properties for theme support */
 :root {
-  --tg-theme-bg-color: #ffffff !important;
-  --tg-theme-secondary-bg-color: #f5f5f5 !important;
+  /* Light theme (default) */
+  --tg-theme-bg-color: #ffffff;
+  --tg-theme-secondary-bg-color: #f8fafc;
+  --tg-theme-text-color: #0f172a;
+  --tg-theme-hint-color: #64748b;
+  --tg-theme-button-color: #2563eb;
+  --tg-theme-button-text-color: #ffffff;
 }
 
-/* Only fix main container backgrounds, preserve all other colors */
+/* Dark theme variables will be set by ThemeContext */
+
+/* Smooth transitions for theme changes */
 .MuiContainer-root {
   background-color: transparent !important;
+  transition: background-color 0.3s ease;
 }
 
-/* Preserve all gradients and colors in AppBars */
-.MuiAppBar-root {
-  /* Don't override - let gradients work */
-}
-
-/* Preserve all card colors and effects */
+/* Ensure proper theme transitions */
 .MuiCard-root {
-  /* Don't override - let colorful cards work */
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Preserve all chip colors */
-.MuiChip-root {
-  /* Don't override - let colorful chips work */
+.MuiPaper-root {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Only fix bottom navigation background */
 .MuiBottomNavigation-root {
-  background-color: #ffffff !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Telegram Web App specific styles */
+.tg-viewport {
+  transition: background-color 0.3s ease;
+}
+
+/* Ensure text remains readable during theme transitions */
+.MuiTypography-root {
+  transition: color 0.3s ease;
+}
+
+/* Override colorful elements to use theme colors */
+.MuiCard-root:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+/* Remove hover animations from all elements */
+.MuiCard-root,
+.MuiChip-root,
+.MuiButton-root,
+.MuiFab-root {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+}
+
+.MuiCard-root:hover,
+.MuiChip-root:hover,
+.MuiButton-root:hover,
+.MuiFab-root:hover {
+  transform: none !important;
+}
+
+/* Ensure proper theme application */
+.MuiCard-root,
+.MuiButton-root,
+.MuiChip-root {
+  border-radius: 8px !important;
+}
+
+/* Override all hardcoded colors in detail pages to use theme colors */
+/* This ensures all text is visible in both light and dark themes */
+
+/* Force all hardcoded text colors to use theme colors */
+[style*="color: #2c3e50"],
+[style*="color:#2c3e50"],
+.MuiTypography-root[style*="color: #2c3e50"],
+.MuiTypography-root[style*="color:#2c3e50"] {
+  color: var(--mui-palette-text-primary) !important;
+}
+
+/* Force all hardcoded chip colors to use theme colors */
+.MuiChip-root[style*="background"] {
+  background-color: var(--mui-palette-primary-main) !important;
+  color: white !important;
+}
+
+.MuiChip-root[style*="border"] {
+  border-color: var(--mui-palette-primary-main) !important;
+  color: var(--mui-palette-primary-main) !important;
+}
+
+/* Force all hardcoded button gradients to use theme colors */
+.MuiButton-root[style*="linear-gradient"] {
+  background: var(--mui-palette-primary-main) !important;
+  color: white !important;
+}
+
+/* Ensure all containers have proper background */
+.MuiContainer-root {
+  background-color: var(--mui-palette-background-default) !important;
+}
+
+/* Force all Box components to inherit proper background */
+.MuiBox-root {
+  background-color: inherit !important;
+}
+
+/* Override any remaining hardcoded colors */
+[style*="color: #"] {
+  color: var(--mui-palette-text-primary) !important;
 }
 
 .logo {

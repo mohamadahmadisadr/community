@@ -5,11 +5,11 @@ import { Provider } from 'react-redux'
 import store from './store'
 import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { initTelegramWebApp, forceLightTheme } from './utils/telegramInit';
+import { initTelegramWebApp, initTelegramTheme } from './utils/telegramInit';
 
 // Initialize Telegram Web App
 initTelegramWebApp();
-forceLightTheme();
+initTelegramTheme();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

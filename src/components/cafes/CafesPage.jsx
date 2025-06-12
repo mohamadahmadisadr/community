@@ -12,6 +12,7 @@ import {
   Rating,
   InputAdornment,
   Avatar,
+  useTheme,
 } from '@mui/material';
 import { Add, Search, LocationOn, Phone, Schedule, Wifi, LocalCafe, Star, AttachMoney, DirectionsCar, Pets } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
@@ -24,6 +25,7 @@ const CafesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     fetchCafes();
@@ -106,15 +108,9 @@ const CafesPage = () => {
             <Grid item xs={12} sm={6} md={4} key={cafe.id}>
               <Card
                 sx={{
-                  borderRadius: 4,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: `2px solid ${cafeColors[index % cafeColors.length]}20`,
-                  '&:hover': {
-                    transform: 'translateY(-8px) scale(1.02)',
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
-                    border: `2px solid ${cafeColors[index % cafeColors.length]}`,
-                  },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 {cafe.image && (
@@ -124,8 +120,7 @@ const CafesPage = () => {
                     image={cafe.image}
                     alt={cafe.name}
                     sx={{
-                      borderRadius: '16px 16px 0 0',
-                      filter: 'brightness(0.9)'
+                      borderRadius: '8px 8px 0 0'
                     }}
                   />
                 )}
@@ -133,7 +128,7 @@ const CafesPage = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
                       sx={{
-                        bgcolor: cafeColors[index % cafeColors.length],
+                        bgcolor: theme.palette.primary.main,
                         width: 32,
                         height: 32,
                         mr: 2
@@ -149,7 +144,7 @@ const CafesPage = () => {
                         fontFamily: getFontFamily(cafe.name),
                         fontSize: '1.1rem',
                         flex: 1,
-                        color: '#2c3e50'
+                        color: theme.palette.text.primary
                       }}
                     >
                       {cafe.name}
@@ -181,11 +176,8 @@ const CafesPage = () => {
                       <Chip
                         label={cafe.specialty}
                         size="small"
-                        sx={{
-                          bgcolor: `${cafeColors[index % cafeColors.length]}15`,
-                          color: cafeColors[index % cafeColors.length],
-                          fontWeight: 'bold'
-                        }}
+                        variant="outlined"
+                        color="primary"
                       />
                     </Box>
                   )}
@@ -197,10 +189,10 @@ const CafesPage = () => {
                       size="small"
                       variant="outlined"
                       sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
+                        borderColor: theme.palette.divider,
+                        color: theme.palette.text.secondary,
                         '& .MuiChip-icon': {
-                          color: '#6c757d'
+                          color: theme.palette.text.secondary
                         }
                       }}
                     />
@@ -213,13 +205,7 @@ const CafesPage = () => {
                         label={cafe.phone}
                         size="small"
                         variant="outlined"
-                        sx={{
-                          borderColor: cafeColors[index % cafeColors.length],
-                          color: cafeColors[index % cafeColors.length],
-                          '& .MuiChip-icon': {
-                            color: cafeColors[index % cafeColors.length]
-                          }
-                        }}
+                        color="secondary"
                       />
                     </Box>
                   )}
@@ -268,11 +254,11 @@ const CafesPage = () => {
                         label="WiFi"
                         size="small"
                         sx={{
-                          bgcolor: '#17a2b8',
-                          color: 'white',
+                          bgcolor: theme.palette.info.main,
+                          color: theme.palette.info.contrastText,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: 'white'
+                            color: theme.palette.info.contrastText
                           }
                         }}
                       />
@@ -282,8 +268,8 @@ const CafesPage = () => {
                         label="Outdoor"
                         size="small"
                         sx={{
-                          bgcolor: '#28a745',
-                          color: 'white',
+                          bgcolor: theme.palette.success.main,
+                          color: theme.palette.success.contrastText,
                           fontWeight: 'bold'
                         }}
                       />
@@ -294,11 +280,11 @@ const CafesPage = () => {
                         label="Parking"
                         size="small"
                         sx={{
-                          bgcolor: '#6f42c1',
-                          color: 'white',
+                          bgcolor: theme.palette.secondary.main,
+                          color: theme.palette.secondary.contrastText,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: 'white'
+                            color: theme.palette.secondary.contrastText
                           }
                         }}
                       />
@@ -309,11 +295,11 @@ const CafesPage = () => {
                         label="Pet Friendly"
                         size="small"
                         sx={{
-                          bgcolor: '#fd7e14',
-                          color: 'white',
+                          bgcolor: theme.palette.warning.main,
+                          color: theme.palette.warning.contrastText,
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
-                            color: 'white'
+                            color: theme.palette.warning.contrastText
                           }
                         }}
                       />
@@ -325,14 +311,7 @@ const CafesPage = () => {
                       icon={<AttachMoney />}
                       label={cafe.priceRange}
                       size="small"
-                      sx={{
-                        bgcolor: cafeColors[index % cafeColors.length],
-                        color: 'white',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
+                      color="secondary"
                     />
                   )}
                 </CardContent>
@@ -345,12 +324,12 @@ const CafesPage = () => {
         {!loading && filteredCafes.length === 0 && (
           <Box sx={{ textAlign: 'center', mt: 6, mb: 4 }}>
             <Avatar sx={{
-              bgcolor: '#f8f9fa',
+              bgcolor: theme.palette.background.paper,
               width: 80,
               height: 80,
               mx: 'auto',
               mb: 2,
-              border: '3px solid #e9ecef'
+              border: `3px solid ${theme.palette.divider}`
             }}>
               <LocalCafe sx={{ fontSize: 40, color: '#6c757d' }} />
             </Avatar>
@@ -373,10 +352,10 @@ const CafesPage = () => {
             bottom: 80,
             right: 16,
             zIndex: 1000,
-            background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
+            background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
             boxShadow: '0 8px 32px rgba(150, 206, 180, 0.4)',
             '&:hover': {
-              background: 'linear-gradient(135deg, #74b9a0 0%, #fdd835 100%)',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
               transform: 'scale(1.1)',
               boxShadow: '0 12px 40px rgba(150, 206, 180, 0.6)',
             }

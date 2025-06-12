@@ -16,7 +16,8 @@ import {
   CardMedia,
   Chip,
   Avatar,
-  Divider
+  Divider,
+  useTheme
 } from "@mui/material";
 import {
   ArrowBack,
@@ -36,6 +37,7 @@ const JobDetailPage = () => {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -93,8 +95,6 @@ const JobDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -115,7 +115,7 @@ const JobDetailPage = () => {
         </AppBar>
 
         <Container maxWidth={false} sx={{ pt: 4, pb: 2, px: 2, m: 0, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress size={60} sx={{ color: '#667eea' }} />
+          <CircularProgress size={60} color="primary" />
         </Container>
       </Box>
     );
@@ -128,8 +128,6 @@ const JobDetailPage = () => {
         <AppBar
           position="static"
           sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
             m: 0,
             p: 0
           }}
@@ -152,14 +150,15 @@ const JobDetailPage = () => {
         <Container maxWidth={false} sx={{ pt: 4, pb: 2, px: 2, m: 0, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Box sx={{ textAlign: 'center' }}>
             <Avatar sx={{
-              bgcolor: '#f8f9fa',
+              bgcolor: 'grey.100',
               width: 80,
               height: 80,
               mx: 'auto',
               mb: 2,
-              border: '3px solid #e9ecef'
+              border: 3,
+              borderColor: 'grey.300'
             }}>
-              <Work sx={{ fontSize: 40, color: '#6c757d' }} />
+              <Work sx={{ fontSize: 40, color: 'grey.500' }} />
             </Avatar>
             <Typography variant="h5" color="error" sx={{ fontWeight: 'bold', mb: 1 }}>
               Job Not Found
@@ -174,13 +173,11 @@ const JobDetailPage = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* AppBar with job title */}
       <AppBar
         position="static"
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
           m: 0,
           p: 0
         }}
@@ -194,7 +191,7 @@ const JobDetailPage = () => {
           >
             <ArrowBack />
           </IconButton>
-          <Avatar sx={{ bgcolor: '#fff', color: '#667eea', mr: 2 }}>
+          <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: 'white', mr: 2 }}>
             <Work />
           </Avatar>
           <Typography
@@ -216,31 +213,33 @@ const JobDetailPage = () => {
       </AppBar>
 
       <Container maxWidth={false} sx={{ pt: 0, pb: 10, px: 0, m: 0, flex: 1 }}>
-        {/* Job Image */}
-        {job.image && (
+        {/* Job Image or Placeholder */}
+        {job.image ? (
           <CardMedia
             component="img"
             height="250"
             image={job.image}
             alt={job.title}
             sx={{
-              objectFit: "cover",
-              filter: 'brightness(0.9)'
+              objectFit: "cover"
             }}
           />
-        )}
-
-        {/* Job Details Card */}
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Card
+        ) : (
+          <Box
             sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #667eea20',
-              mb: 2
+              height: 250,
+              backgroundColor: 'grey.100',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            <CardContent sx={{ p: 3 }}>
+            <Work sx={{ fontSize: 80, color: 'grey.400' }} />
+          </Box>
+        )}
+
+        {/* Job Details */}
+        <Box sx={{ px: 2, pt: 2 }}>
               {/* Job Title */}
               <Typography
                 variant="h5"
@@ -248,8 +247,7 @@ const JobDetailPage = () => {
                   fontWeight: "bold",
                   mb: 2,
                   textAlign: getTextDirection(job.title) === "rtl" ? "right" : "left",
-                  fontFamily: getFontFamily(job.title),
-                  color: '#2c3e50'
+                  fontFamily: getFontFamily(job.title)
                 }}
               >
                 {job.title}
@@ -261,14 +259,8 @@ const JobDetailPage = () => {
                   <Chip
                     icon={<LocationOn />}
                     label={`${job.location?.city || job.city}, ${job.location?.province || job.province}`}
-                    sx={{
-                      bgcolor: '#667eea15',
-                      color: '#667eea',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: '#667eea'
-                      }
-                    }}
+                    variant="outlined"
+                    color="primary"
                   />
                 )}
                 {(job.location?.country || job.country) && (
@@ -276,48 +268,27 @@ const JobDetailPage = () => {
                     icon={<Business />}
                     label={job.location?.country || job.country}
                     variant="outlined"
-                    sx={{
-                      borderColor: '#667eea',
-                      color: '#667eea',
-                      '& .MuiChip-icon': {
-                        color: '#667eea'
-                      }
-                    }}
+                    color="primary"
                   />
                 )}
                 {job.company && (
                   <Chip
                     icon={<Business />}
                     label={job.company}
-                    sx={{
-                      bgcolor: '#28a745',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: 'white'
-                      }
-                    }}
+                    color="primary"
                   />
                 )}
                 {job.jobType && (
                   <Chip
                     label={job.jobType}
-                    sx={{
-                      bgcolor: '#17a2b8',
-                      color: 'white',
-                      fontWeight: 'bold'
-                    }}
+                    color="secondary"
                   />
                 )}
                 {job.category && job.category !== 'General' && (
                   <Chip
                     label={job.category}
                     variant="outlined"
-                    sx={{
-                      borderColor: '#fd7e14',
-                      color: '#fd7e14',
-                      fontWeight: 'bold'
-                    }}
+                    color="primary"
                   />
                 )}
                 {job.createdAt && (
@@ -326,13 +297,7 @@ const JobDetailPage = () => {
                     label={new Date(job.createdAt.seconds * 1000).toLocaleDateString()}
                     size="small"
                     variant="outlined"
-                    sx={{
-                      borderColor: '#6c757d',
-                      color: '#6c757d',
-                      '& .MuiChip-icon': {
-                        color: '#6c757d'
-                      }
-                    }}
+                    color="secondary"
                   />
                 )}
               </Box>
@@ -342,15 +307,13 @@ const JobDetailPage = () => {
               {/* Salary Information */}
               {job.salary && (job.salary.min || job.salary.max) && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                     Salary Range
                   </Typography>
                   <Chip
                     label={`${job.salary.min ? `$${job.salary.min.toLocaleString()}` : 'N/A'} - ${job.salary.max ? `$${job.salary.max.toLocaleString()}` : 'N/A'} ${job.salary.currency || 'CAD'} ${job.salary.type || 'annually'}`}
+                    color="primary"
                     sx={{
-                      bgcolor: '#28a745',
-                      color: 'white',
-                      fontWeight: 'bold',
                       fontSize: '1rem',
                       py: 1
                     }}
@@ -361,7 +324,7 @@ const JobDetailPage = () => {
               {/* Requirements */}
               {job.requirements && job.requirements.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                     Requirements
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -370,10 +333,7 @@ const JobDetailPage = () => {
                         key={index}
                         label={requirement}
                         variant="outlined"
-                        sx={{
-                          borderColor: '#667eea',
-                          color: '#667eea'
-                        }}
+                        color="primary"
                       />
                     ))}
                   </Box>
@@ -383,7 +343,7 @@ const JobDetailPage = () => {
               {/* Benefits */}
               {job.benefits && job.benefits.length > 0 && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                     Benefits
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -391,11 +351,7 @@ const JobDetailPage = () => {
                       <Chip
                         key={index}
                         label={benefit}
-                        sx={{
-                          bgcolor: '#17a2b8',
-                          color: 'white',
-                          fontWeight: 'bold'
-                        }}
+                        color="secondary"
                       />
                     ))}
                   </Box>
@@ -405,43 +361,23 @@ const JobDetailPage = () => {
               {/* Contact Information */}
               {(job.contactEmail || job.contactPhone) && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: '#2c3e50' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                     Contact Information
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {job.contactEmail && (
                       <Chip
                         label={job.contactEmail}
-                        sx={{
-                          bgcolor: '#dc3545',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                            backgroundColor: '#c82333'
-                          }
-                        }}
+                        color="primary"
+                        sx={{ cursor: 'pointer' }}
                         {...getClickableChipProps('email', job.contactEmail)}
                       />
                     )}
                     {job.contactPhone && (
                       <Chip
                         label={job.contactPhone}
-                        sx={{
-                          bgcolor: '#6f42c1',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                            backgroundColor: '#5a2d91'
-                          }
-                        }}
+                        color="secondary"
+                        sx={{ cursor: 'pointer' }}
                         {...getClickableChipProps('phone', job.contactPhone)}
                       />
                     )}
@@ -450,7 +386,7 @@ const JobDetailPage = () => {
               )}
 
               {/* Job Description */}
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#2c3e50' }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
                 Job Description
               </Typography>
               <Typography
@@ -458,7 +394,7 @@ const JobDetailPage = () => {
                 sx={{
                   mb: 3,
                   lineHeight: 1.8,
-                  color: "text.primary",
+                  color: theme.palette.text.primary,
                   textAlign: getTextDirection(job.description) === "rtl" ? "right" : "left",
                   fontFamily: getFontFamily(job.description),
                   whiteSpace: "pre-line",
@@ -478,16 +414,8 @@ const JobDetailPage = () => {
                       py: 1.5,
                       px: 3,
                       fontSize: "1rem",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 25px rgba(102, 126, 234, 0.4)',
-                      }
+                      fontWeight: 500,
+                      textTransform: "none"
                     }}
                   >
                     Apply Now
@@ -500,21 +428,6 @@ const JobDetailPage = () => {
                     variant="contained"
                     startIcon={<OpenInNew />}
                     onClick={() => alert("To apply for this job, please contact the employer directly or check the job description for application instructions.")}
-                    sx={{
-                      py: 1.5,
-                      px: 3,
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #6c757d 0%, #495057 100%)',
-                      boxShadow: '0 4px 20px rgba(108, 117, 125, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #5a6268 0%, #3d4142 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 25px rgba(108, 117, 125, 0.4)',
-                      }
-                    }}
                   >
                     How to Apply
                   </Button>
@@ -528,41 +441,19 @@ const JobDetailPage = () => {
                     py: 1.5,
                     px: 3,
                     fontSize: "1rem",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    borderRadius: 3,
-                    borderColor: '#667eea',
-                    color: '#667eea',
-                    '&:hover': {
-                      borderColor: '#5a6fd8',
-                      backgroundColor: '#667eea10',
-                      transform: 'translateY(-2px)',
-                    }
+                    fontWeight: 500,
+                    textTransform: "none"
                   }}
                 >
                   Share
                 </Button>
               </Stack>
-            </CardContent>
-          </Card>
 
-          {/* Comments Section - Separate Card */}
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-              border: '2px solid #667eea20',
-              mt: 2
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
+              {/* Comments Section */}
               <CommentsSection
                 itemId={id}
                 itemType="job"
-                color="#667eea"
               />
-            </CardContent>
-          </Card>
         </Box>
       </Container>
     </Box>

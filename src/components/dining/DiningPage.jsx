@@ -16,14 +16,15 @@ import {
   Tab,
   Button,
 } from '@mui/material';
-import { Add, Search, LocationOn, Phone, Schedule, Wifi, Restaurant, LocalCafe, Star, AttachMoney, DirectionsCar, Pets, Share, Visibility } from '@mui/icons-material';
+import { Add, Search, LocationOn, Phone, Schedule, Wifi, Restaurant, LocalCafe, Star, AttachMoney, DirectionsCar, Pets, Visibility } from '@mui/icons-material';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import AppBarLayout from '../../layouts/AppBarLayout';
 import usePagination from '../../hooks/usePagination';
 import InfiniteScrollComponent from '../../components/common/InfiniteScrollComponent';
-import { getClickableChipProps } from '../../utils/contactUtils';
+import { useTheme } from '@mui/material/styles';
+
 
 const DiningPage = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -32,6 +33,7 @@ const DiningPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState(0);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     fetchDiningData();
@@ -117,7 +119,7 @@ const DiningPage = () => {
     return persianRegex.test(text) ? "'Vazir', sans-serif" : "'Roboto', sans-serif";
   };
 
-  const diningColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F8B500', '#FF8A80'];
+
 
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
@@ -161,8 +163,6 @@ const DiningPage = () => {
     <AppBarLayout
       title={currentTab === 0 ? "Restaurants" : "Cafés"}
       icon={currentTab === 0 ? <Restaurant /> : <LocalCafe />}
-      gradient={currentTab === 0 ? "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)" : "linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)"}
-      iconColor={currentTab === 0 ? "#4ecdc4" : "#96ceb4"}
       count={filteredData.length}
       countLabel={currentTab === 0 ? 'Restaurants' : 'Cafés'}
     >
@@ -174,16 +174,9 @@ const DiningPage = () => {
           variant="fullWidth"
           sx={{
             '& .MuiTab-root': {
-              fontWeight: 'bold',
+              fontWeight: 500,
               textTransform: 'none',
               fontSize: '1rem',
-            },
-            '& .Mui-selected': {
-              color: '#4ecdc4 !important',
-            },
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#4ecdc4',
-              height: 3,
             }
           }}
         >
@@ -231,7 +224,6 @@ const DiningPage = () => {
         sx={{
           mb: 3,
           '& .MuiOutlinedInput-root': {
-            borderRadius: 3,
             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
             '&:hover': {
               boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
@@ -246,158 +238,92 @@ const DiningPage = () => {
           <Grid item xs={12} sm={6} md={4} key={item.id}>
             <Card
               sx={{
-                borderRadius: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                border: `2px solid ${diningColors[index % diningColors.length]}20`,
-                '&:hover': {
-                  transform: 'translateY(-8px) scale(1.02)',
-                  boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
-                  border: `2px solid ${diningColors[index % diningColors.length]}`,
-                },
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
-              {item.image && (
+              {/* Image or Placeholder */}
+              {item.image ? (
                 <CardMedia
                   component="img"
-                  height="180"
+                  height="160"
                   image={item.image}
                   alt={item.name}
                   sx={{
-                    borderRadius: '16px 16px 0 0',
-                    filter: 'brightness(0.9)'
+                    borderRadius: '8px 8px 0 0'
                   }}
                 />
+              ) : (
+                <Box
+                  sx={{
+                    height: 160,
+                    backgroundColor: 'grey.100',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '8px 8px 0 0'
+                  }}
+                >
+                  {item.type === 'restaurant' ?
+                    <Restaurant sx={{ fontSize: 48, color: 'grey.400' }} /> :
+                    <LocalCafe sx={{ fontSize: 48, color: 'grey.400' }} />
+                  }
+                </Box>
               )}
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: diningColors[index % diningColors.length],
-                      width: 32,
-                      height: 32,
-                      mr: 2
-                    }}
-                  >
-                    {item.type === 'restaurant' ? <Restaurant sx={{ fontSize: 18 }} /> : <LocalCafe sx={{ fontSize: 18 }} />}
-                  </Avatar>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 'bold',
-                      textAlign: getTextDirection(item.name) === 'rtl' ? 'right' : 'left',
-                      fontFamily: getFontFamily(item.name),
-                      fontSize: '1.1rem',
-                      flex: 1,
-                      color: '#2c3e50'
-                    }}
-                  >
-                    {item.name}
+
+              <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                {/* Title */}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    textAlign: getTextDirection(item.name) === 'rtl' ? 'right' : 'left',
+                    fontFamily: getFontFamily(item.name),
+                    mb: 1,
+                    lineHeight: 1.3,
+                    color: theme.palette.text.primary
+                  }}
+                >
+                  {item.name}
+                </Typography>
+
+                {/* Rating and Cuisine */}
+                <Box sx={{ mb: 2 }}>
+                  {parseFloat(item.rating) > 0 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      <Star sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle', color: 'primary.main' }} />
+                      {item.rating} rating
+                    </Typography>
+                  )}
+                  {(item.cuisine || item.specialty) && (item.cuisine?.trim() !== '' || item.specialty?.trim() !== '') && (
+                    <Typography variant="body2" color="text.secondary">
+                      {item.cuisine || item.specialty}
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Location and Contact */}
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    <LocationOn sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle' }} />
+                    {`${item.location?.address || item.address}, ${item.location?.city || item.city}`}
                   </Typography>
+                  {(item.contactInfo?.phone || item.contact?.phone || item.phone) && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      <Phone sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle' }} />
+                      {item.contactInfo?.phone || item.contact?.phone || item.phone}
+                    </Typography>
+                  )}
+                  {item.hours && (typeof item.hours === 'string' ? item.hours.trim() !== '' : Object.values(item.hours).some(h => h && h.trim() !== '')) && (
+                    <Typography variant="body2" color="text.secondary">
+                      <Schedule sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle' }} />
+                      {typeof item.hours === 'string' ? item.hours : 'See hours'}
+                    </Typography>
+                  )}
                 </Box>
 
-                {parseFloat(item.rating) > 0 && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Rating value={parseFloat(item.rating)} readOnly size="small" />
-                    <Chip
-                      icon={<Star />}
-                      label={item.rating}
-                      size="small"
-                      sx={{
-                        ml: 1,
-                        bgcolor: '#ffd700',
-                        color: '#000',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: '#000'
-                        }
-                      }}
-                    />
-                  </Box>
-                )}
-
-                {(item.cuisine || item.specialty) && (item.cuisine?.trim() !== '' || item.specialty?.trim() !== '') && (
-                  <Box sx={{ mb: 2 }}>
-                    <Chip
-                      label={item.cuisine || item.specialty}
-                      size="small"
-                      sx={{
-                        bgcolor: `${diningColors[index % diningColors.length]}15`,
-                        color: diningColors[index % diningColors.length],
-                        fontWeight: 'bold'
-                      }}
-                    />
-                  </Box>
-                )}
-
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Chip
-                    icon={<LocationOn />}
-                    label={`${item.location?.address || item.address}, ${item.location?.city || item.city}`}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      borderColor: '#6c757d',
-                      color: '#6c757d',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease-in-out',
-                      '& .MuiChip-icon': {
-                        color: '#6c757d'
-                      },
-                      '&:hover': {
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        backgroundColor: '#6c757d10'
-                      }
-                    }}
-                    {...getClickableChipProps('address', item.location?.address || item.address, item.location?.city || item.city)}
-                  />
-                </Box>
-
-                {(item.contactInfo?.phone || item.contact?.phone || item.phone) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Chip
-                      icon={<Phone />}
-                      label={item.contactInfo?.phone || item.contact?.phone || item.phone}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderColor: diningColors[index % diningColors.length],
-                        color: diningColors[index % diningColors.length],
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        '& .MuiChip-icon': {
-                          color: diningColors[index % diningColors.length]
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: `${diningColors[index % diningColors.length]}10`
-                        }
-                      }}
-                      {...getClickableChipProps('phone', item.contactInfo?.phone || item.contact?.phone || item.phone)}
-                    />
-                  </Box>
-                )}
-
-                {item.hours && (typeof item.hours === 'string' ? item.hours.trim() !== '' : Object.values(item.hours).some(h => h && h.trim() !== '')) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Chip
-                      icon={<Schedule />}
-                      label={typeof item.hours === 'string' ? item.hours : 'See hours'}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderColor: '#28a745',
-                        color: '#28a745',
-                        '& .MuiChip-icon': {
-                          color: '#28a745'
-                        }
-                      }}
-                    />
-                  </Box>
-                )}
-
+                {/* Description */}
                 {item.description && (
                   <Typography
                     variant="body2"
@@ -409,132 +335,85 @@ const DiningPage = () => {
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
-                      lineHeight: 1.6,
-                      mb: 2
+                      lineHeight: 1.5,
+                      mb: 2,
+                      flex: 1
                     }}
                   >
                     {item.description}
                   </Typography>
                 )}
 
-                {/* Features for cafes */}
-                {item.type === 'cafe' && (
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                    {(item.features?.hasWifi || item.hasWifi) && (
-                      <Chip
-                        icon={<Wifi />}
-                        label="WiFi"
-                        size="small"
-                        sx={{
-                          bgcolor: '#17a2b8',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: 'white'
-                          }
-                        }}
-                      />
-                    )}
-                    {(item.features?.hasOutdoorSeating || item.hasOutdoorSeating) && (
-                      <Chip
-                        label="Outdoor"
-                        size="small"
-                        sx={{
-                          bgcolor: '#28a745',
-                          color: 'white',
-                          fontWeight: 'bold'
-                        }}
-                      />
-                    )}
-                    {(item.features?.hasParking || item.hasParking) && (
-                      <Chip
-                        icon={<DirectionsCar />}
-                        label="Parking"
-                        size="small"
-                        sx={{
-                          bgcolor: '#6f42c1',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: 'white'
-                          }
-                        }}
-                      />
-                    )}
-                    {(item.features?.petFriendly || item.petFriendly) && (
-                      <Chip
-                        icon={<Pets />}
-                        label="Pet Friendly"
-                        size="small"
-                        sx={{
-                          bgcolor: '#fd7e14',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: 'white'
-                          }
-                        }}
-                      />
-                    )}
-                  </Box>
-                )}
-
-                {item.priceRange && item.priceRange.trim() !== '' && item.priceRange !== '$$' && (
-                  <Chip
-                    icon={<AttachMoney />}
-                    label={item.priceRange}
-                    size="small"
-                    sx={{
-                      bgcolor: diningColors[index % diningColors.length],
-                      color: 'white',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: 'white'
-                      }
-                    }}
-                  />
-                )}
-
-                {/* Action Buttons */}
-                <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<Visibility />}
-                    onClick={() => handleViewDetails(item)}
-                    sx={{
-                      flex: 1,
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      background: `linear-gradient(135deg, ${diningColors[index % diningColors.length]} 0%, ${diningColors[index % diningColors.length]}CC 100%)`,
-                      '&:hover': {
-                        transform: 'translateY(-1px)',
-                        boxShadow: `0 4px 12px ${diningColors[index % diningColors.length]}40`,
-                      }
-                    }}
-                  >
-                    View Details
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Share />}
-                    onClick={() => handleShare(item)}
-                    sx={{
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      borderColor: diningColors[index % diningColors.length],
-                      color: diningColors[index % diningColors.length],
-                      '&:hover': {
-                        borderColor: diningColors[index % diningColors.length],
-                        backgroundColor: `${diningColors[index % diningColors.length]}10`,
-                        transform: 'translateY(-1px)',
-                      }
-                    }}
-                  >
-                    Share
-                  </Button>
+                {/* Features and Price */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                  {item.type === 'cafe' && (
+                    <>
+                      {(item.features?.hasWifi || item.hasWifi) && (
+                        <Chip
+                          icon={<Wifi />}
+                          label="WiFi"
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                        />
+                      )}
+                      {(item.features?.hasOutdoorSeating || item.hasOutdoorSeating) && (
+                        <Chip
+                          label="Outdoor"
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                        />
+                      )}
+                      {(item.features?.hasParking || item.hasParking) && (
+                        <Chip
+                          icon={<DirectionsCar />}
+                          label="Parking"
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                        />
+                      )}
+                      {(item.features?.petFriendly || item.petFriendly) && (
+                        <Chip
+                          icon={<Pets />}
+                          label="Pet Friendly"
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                        />
+                      )}
+                    </>
+                  )}
+                  {item.priceRange && item.priceRange.trim() !== '' && item.priceRange !== '$$' && (
+                    <Chip
+                      icon={<AttachMoney />}
+                      label={item.priceRange}
+                      size="small"
+                      color="secondary"
+                    />
+                  )}
                 </Box>
+
+                {/* Action Button */}
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Visibility />}
+                  onClick={() => handleViewDetails(item)}
+                  sx={{
+                    textTransform: 'none',
+                    mt: 'auto',
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    '&:hover': {
+                      bgcolor: theme.palette.primary.dark,
+                    }
+                  }}
+                  fullWidth
+                >
+                  View Details
+                </Button>
               </CardContent>
             </Card>
           </Grid>
@@ -584,14 +463,7 @@ const DiningPage = () => {
           position: 'fixed',
           bottom: 120,
           right: 16,
-          zIndex: 1000,
-          background: 'linear-gradient(135deg, #4ecdc4 0%, #96ceb4 100%)',
-          boxShadow: '0 8px 32px rgba(78, 205, 196, 0.4)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #26d0ce 0%, #74b9a0 100%)',
-            transform: 'scale(1.1)',
-            boxShadow: '0 12px 40px rgba(78, 205, 196, 0.6)',
-          }
+          zIndex: 1000
         }}
       >
         <Add />

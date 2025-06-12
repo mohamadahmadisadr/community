@@ -12,6 +12,7 @@ import {
   Rating,
   InputAdornment,
   Avatar,
+  useTheme,
 } from '@mui/material';
 import { Add, Search, LocationOn, Phone, Schedule, Restaurant, Star, AttachMoney } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
@@ -24,6 +25,7 @@ const RestaurantsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     fetchRestaurants();
@@ -106,15 +108,9 @@ const RestaurantsPage = () => {
             <Grid item xs={12} sm={6} md={4} key={restaurant.id}>
               <Card
                 sx={{
-                  borderRadius: 4,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: `2px solid ${restaurantColors[index % restaurantColors.length]}20`,
-                  '&:hover': {
-                    transform: 'translateY(-8px) scale(1.02)',
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
-                    border: `2px solid ${restaurantColors[index % restaurantColors.length]}`,
-                  },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 {restaurant.image && (
@@ -124,8 +120,7 @@ const RestaurantsPage = () => {
                     image={restaurant.image}
                     alt={restaurant.name}
                     sx={{
-                      borderRadius: '16px 16px 0 0',
-                      filter: 'brightness(0.9)'
+                      borderRadius: '8px 8px 0 0'
                     }}
                   />
                 )}
@@ -133,7 +128,7 @@ const RestaurantsPage = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
                       sx={{
-                        bgcolor: restaurantColors[index % restaurantColors.length],
+                        bgcolor: 'primary.main',
                         width: 32,
                         height: 32,
                         mr: 2
@@ -149,7 +144,7 @@ const RestaurantsPage = () => {
                         fontFamily: getFontFamily(restaurant.name),
                         fontSize: '1.1rem',
                         flex: 1,
-                        color: '#2c3e50'
+                        color: theme.palette.text.primary
                       }}
                     >
                       {restaurant.name}
@@ -163,15 +158,8 @@ const RestaurantsPage = () => {
                         icon={<Star />}
                         label={restaurant.rating}
                         size="small"
-                        sx={{
-                          ml: 1,
-                          bgcolor: '#ffd700',
-                          color: '#000',
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: '#000'
-                          }
-                        }}
+                        color="primary"
+                        sx={{ ml: 1 }}
                       />
                     </Box>
                   )}
@@ -181,11 +169,8 @@ const RestaurantsPage = () => {
                       <Chip
                         label={restaurant.cuisine}
                         size="small"
-                        sx={{
-                          bgcolor: `${restaurantColors[index % restaurantColors.length]}15`,
-                          color: restaurantColors[index % restaurantColors.length],
-                          fontWeight: 'bold'
-                        }}
+                        variant="outlined"
+                        color="primary"
                       />
                     </Box>
                   )}
@@ -197,10 +182,10 @@ const RestaurantsPage = () => {
                       size="small"
                       variant="outlined"
                       sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
+                        borderColor: theme.palette.text.secondary,
+                        color: theme.palette.text.secondary,
                         '& .MuiChip-icon': {
-                          color: '#6c757d'
+                          color: theme.palette.text.secondary
                         }
                       }}
                     />
@@ -232,10 +217,10 @@ const RestaurantsPage = () => {
                         size="small"
                         variant="outlined"
                         sx={{
-                          borderColor: '#28a745',
-                          color: '#28a745',
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
                           '& .MuiChip-icon': {
-                            color: '#28a745'
+                            color: theme.palette.success.main
                           }
                         }}
                       />
@@ -266,14 +251,7 @@ const RestaurantsPage = () => {
                       icon={<AttachMoney />}
                       label={restaurant.priceRange}
                       size="small"
-                      sx={{
-                        bgcolor: restaurantColors[index % restaurantColors.length],
-                        color: 'white',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
+                      color="secondary"
                     />
                   )}
                 </CardContent>
@@ -286,14 +264,14 @@ const RestaurantsPage = () => {
         {!loading && filteredRestaurants.length === 0 && (
           <Box sx={{ textAlign: 'center', mt: 6, mb: 4 }}>
             <Avatar sx={{
-              bgcolor: '#f8f9fa',
+              bgcolor: theme.palette.background.paper,
               width: 80,
               height: 80,
               mx: 'auto',
               mb: 2,
-              border: '3px solid #e9ecef'
+              border: `3px solid ${theme.palette.divider}`
             }}>
-              <Restaurant sx={{ fontSize: 40, color: '#6c757d' }} />
+              <Restaurant sx={{ fontSize: 40, color: theme.palette.text.secondary }} />
             </Avatar>
             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', mb: 1 }}>
               {searchQuery ? 'No restaurants found' : 'No restaurants available'}

@@ -101,7 +101,7 @@ const AddJobPage = () => {
         <IconButton onClick={() => navigate('/jobs')} sx={{ mr: 1 }}>
           <ArrowBack />
         </IconButton>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
           Post New Job
         </Typography>
       </Box>

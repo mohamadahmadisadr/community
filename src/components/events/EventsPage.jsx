@@ -12,6 +12,7 @@ import {
   InputAdornment,
   Avatar,
   Button,
+  useTheme
 } from '@mui/material';
 import { Add, Search, CalendarToday, LocationOn, Event, AccessTime, AttachMoney, Share, Visibility } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
@@ -27,6 +28,7 @@ const EventsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     fetchEvents();
@@ -125,8 +127,6 @@ const EventsPage = () => {
     <AppBarLayout
       title="Events"
       icon={<Event />}
-      gradient="linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"
-      iconColor="#ff6b6b"
       count={filteredEvents.length}
       countLabel="Events"
     >
@@ -147,14 +147,7 @@ const EventsPage = () => {
             },
           }}
           sx={{
-            mb: 3,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 3,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-              }
-            }
+            mb: 3
           }}
         />
 
@@ -164,112 +157,75 @@ const EventsPage = () => {
             <Grid item xs={12} sm={6} md={4} key={event.id}>
               <Card
                 sx={{
-                  borderRadius: 4,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: `2px solid ${eventColors[index % eventColors.length]}20`,
-                  '&:hover': {
-                    transform: 'translateY(-8px) scale(1.02)',
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.2)',
-                    border: `2px solid ${eventColors[index % eventColors.length]}`,
-                  },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
-                {event.image && (
+                {/* Image or Placeholder */}
+                {event.image ? (
                   <CardMedia
                     component="img"
-                    height="180"
+                    height="160"
                     image={event.image}
                     alt={event.title}
                     sx={{
-                      borderRadius: '16px 16px 0 0',
-                      filter: 'brightness(0.9)'
+                      borderRadius: '8px 8px 0 0'
                     }}
                   />
+                ) : (
+                  <Box
+                    sx={{
+                      height: 160,
+                      backgroundColor: 'grey.100',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '8px 8px 0 0'
+                    }}
+                  >
+                    <Event sx={{ fontSize: 48, color: 'grey.400' }} />
+                  </Box>
                 )}
-                <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Avatar
-                      sx={{
-                        bgcolor: eventColors[index % eventColors.length],
-                        width: 32,
-                        height: 32,
-                        mr: 2
-                      }}
-                    >
-                      <Event sx={{ fontSize: 18 }} />
-                    </Avatar>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 'bold',
-                        textAlign: getTextDirection(event.title) === 'rtl' ? 'right' : 'left',
-                        fontFamily: getFontFamily(event.title),
-                        fontSize: '1.1rem',
-                        flex: 1,
-                        color: '#2c3e50'
-                      }}
-                    >
-                      {event.title}
+
+                <CardContent sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  {/* Title */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      textAlign: getTextDirection(event.title) === 'rtl' ? 'right' : 'left',
+                      fontFamily: getFontFamily(event.title),
+                      mb: 1,
+                      lineHeight: 1.3,
+                      color: theme.palette.text.primary
+                    }}
+                  >
+                    {event.title}
+                  </Typography>
+
+
+
+                  {/* Date, Time and Location */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      <CalendarToday sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
+                      {formatDate(event.date)}
+                      {event.time && (
+                        <>
+                          {' • '}
+                          <AccessTime sx={{ fontSize: 16, mx: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
+                          {event.time}
+                        </>
+                      )}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <LocationOn sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
+                      {`${event.location?.name || event.location}, ${event.location?.city || event.city}`}
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Chip
-                      icon={<CalendarToday />}
-                      label={formatDate(event.date)}
-                      size="small"
-                      sx={{
-                        bgcolor: `${eventColors[index % eventColors.length]}15`,
-                        color: eventColors[index % eventColors.length],
-                        fontWeight: 'bold',
-                        mr: 1,
-                        '& .MuiChip-icon': {
-                          color: eventColors[index % eventColors.length]
-                        }
-                      }}
-                    />
-                    {event.time && (
-                      <Chip
-                        icon={<AccessTime />}
-                        label={event.time}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderColor: eventColors[index % eventColors.length],
-                          color: eventColors[index % eventColors.length],
-                          '& .MuiChip-icon': {
-                            color: eventColors[index % eventColors.length]
-                          }
-                        }}
-                      />
-                    )}
-                  </Box>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Chip
-                      icon={<LocationOn />}
-                      label={`${event.location?.name || event.location}, ${event.location?.city || event.city}`}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderColor: '#6c757d',
-                        color: '#6c757d',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        '& .MuiChip-icon': {
-                          color: '#6c757d'
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          backgroundColor: '#6c757d10'
-                        }
-                      }}
-                      {...getClickableChipProps('address', event.location?.name || event.location, event.location?.city || event.city)}
-                    />
-                  </Box>
-
+                  {/* Description */}
                   {event.description && (
                     <Typography
                       variant="body2"
@@ -281,8 +237,10 @@ const EventsPage = () => {
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
                         overflow: 'hidden',
-                        lineHeight: 1.6,
-                        mb: 2
+                        lineHeight: 1.5,
+                        mb: 2,
+                        flex: 1,
+                        color: theme.palette.text.primary
                       }}
                     >
                       {event.description}
@@ -294,10 +252,11 @@ const EventsPage = () => {
                       <Chip
                         label={event.category}
                         size="small"
+                        variant="outlined"
+                        color="primary"
                         sx={{
-                          bgcolor: `${eventColors[index % eventColors.length]}20`,
-                          color: eventColors[index % eventColors.length],
-                          fontWeight: 'bold'
+                          borderColor: theme.palette.primary.main,
+                          color: theme.palette.primary.main
                         }}
                       />
                     )}
@@ -311,52 +270,34 @@ const EventsPage = () => {
                           fontWeight: 'bold',
                           '& .MuiChip-icon': {
                             fontSize: 16
-                          }
+                          },
+                          bgcolor: event.price === 'Free' ? theme.palette.success.light : theme.palette.primary.light,
+                          borderColor: event.price === 'Free' ? theme.palette.success.main : theme.palette.primary.main,
+                          color: event.price === 'Free' ? theme.palette.success.contrastText : theme.palette.primary.contrastText
                         }}
                       />
                     )}
                   </Box>
 
-                  {/* Action Buttons */}
-                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<Visibility />}
-                      onClick={() => handleViewDetails(event)}
-                      sx={{
-                        flex: 1,
-                        textTransform: 'none',
-                        borderRadius: 2,
-                        background: `linear-gradient(135deg, ${eventColors[index % eventColors.length]} 0%, ${eventColors[index % eventColors.length]}CC 100%)`,
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: `0 4px 12px ${eventColors[index % eventColors.length]}40`,
-                        }
-                      }}
-                    >
-                      View Details
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Share />}
-                      onClick={() => handleShare(event)}
-                      sx={{
-                        textTransform: 'none',
-                        borderRadius: 2,
-                        borderColor: eventColors[index % eventColors.length],
-                        color: eventColors[index % eventColors.length],
-                        '&:hover': {
-                          borderColor: eventColors[index % eventColors.length],
-                          backgroundColor: `${eventColors[index % eventColors.length]}10`,
-                          transform: 'translateY(-1px)',
-                        }
-                      }}
-                    >
-                      Share
-                    </Button>
-                  </Box>
+                  {/* Action Button */}
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Visibility />}
+                    onClick={() => handleViewDetails(event)}
+                    sx={{
+                      textTransform: 'none',
+                      mt: 'auto',
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      '&:hover': {
+                        bgcolor: theme.palette.primary.dark
+                      }
+                    }}
+                    fullWidth
+                  >
+                    View Details
+                  </Button>
                 </CardContent>
               </Card>
             </Grid>
@@ -379,14 +320,14 @@ const EventsPage = () => {
         {!loading && filteredEvents.length === 0 && (
           <Box sx={{ textAlign: 'center', mt: 6, mb: 4 }}>
             <Avatar sx={{
-              bgcolor: '#f8f9fa',
+              bgcolor: theme.palette.background.paper,
               width: 80,
               height: 80,
               mx: 'auto',
               mb: 2,
-              border: '3px solid #e9ecef'
+              border: `3px solid ${theme.palette.divider}`
             }}>
-              <Event sx={{ fontSize: 40, color: '#6c757d' }} />
+              <Event sx={{ fontSize: 40, color: theme.palette.text.secondary }} />
             </Avatar>
             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 'bold', mb: 1 }}>
               {searchQuery ? 'No events found' : 'No events available'}
@@ -406,14 +347,7 @@ const EventsPage = () => {
             position: 'fixed',
             bottom: 120,
             right: 16,
-            zIndex: 1000,
-            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
-            boxShadow: '0 8px 32px rgba(255, 107, 107, 0.4)',
-            '&:hover': {
-              background: 'linear-gradient(135deg, #ff5252 0%, #d84315 100%)',
-              transform: 'scale(1.1)',
-              boxShadow: '0 12px 40px rgba(255, 107, 107, 0.6)',
-            }
+            zIndex: 1000
           }}
         >
           <Add />
