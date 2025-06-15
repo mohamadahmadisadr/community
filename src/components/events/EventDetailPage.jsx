@@ -1,33 +1,35 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Button, 
-  CircularProgress, 
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  CircularProgress,
   Stack,
   AppBar,
   Toolbar,
   IconButton,
-  Card,
-  CardContent,
   CardMedia,
   Chip,
   Avatar,
   Divider
 } from "@mui/material";
-import { 
-  ArrowBack, 
-  Event, 
-  LocationOn, 
-  Schedule, 
-  Share, 
+import {
+  ArrowBack,
+  Event,
+  LocationOn,
+  Share,
   OpenInNew,
   CalendarToday,
   Person,
-  AttachMoney
+  AttachMoney,
+  Email,
+  Phone,
+  Language,
+  Group,
+  AccessTime
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
@@ -72,12 +74,6 @@ const EventDetailPage = () => {
     return persianRegex.test(text) ? "'Vazir', sans-serif" : "'Roboto', sans-serif";
   };
 
-  const handleRegister = () => {
-    if (event.link) {
-      window.open(event.link, "_blank", "noopener,noreferrer");
-    }
-  };
-
   const handleShare = () => {
     const eventUrl = `${window.location.origin}/event/${id}`;
     if (navigator.share) {
@@ -95,7 +91,17 @@ const EventDetailPage = () => {
 
   const formatDate = (timestamp) => {
     if (!timestamp) return '';
-    const date = new Date(timestamp.seconds * 1000);
+
+    // Handle both Firestore timestamp and regular Date objects
+    let date;
+    if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else {
+      date = new Date(timestamp);
+    }
+
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -106,7 +112,33 @@ const EventDetailPage = () => {
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
-    return timeString;
+    // Convert 24-hour format to 12-hour format
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const getLocationDisplay = (event) => {
+    if (event.location?.isOnline) {
+      return 'Online Event';
+    } else if (event.location?.venue) {
+      // New database structure
+      const parts = [event.location.venue];
+      if (event.location.city) parts.push(event.location.city);
+      if (event.location.province) parts.push(event.location.province);
+      return parts.join(', ');
+    } else if (event.location?.name) {
+      // Legacy structure
+      const parts = [event.location.name];
+      if (event.location.city) parts.push(event.location.city);
+      return parts.join(', ');
+    } else if (typeof event.location === 'string') {
+      // Very old structure
+      return event.location;
+    }
+    return '';
   };
 
   if (loading) {
@@ -281,21 +313,48 @@ const EventDetailPage = () => {
                     color="primary"
                   />
                 )}
-                {event.price && (
+                {/* Price/Ticket Information */}
+                {(() => {
+                  // Determine price display - prioritize new ticketPrice field
+                  let priceDisplay = null;
+                  let isFree = false;
+
+                  if (event.ticketPrice !== undefined && event.ticketPrice !== null) {
+                    // New database structure
+                    isFree = event.ticketPrice === 0;
+                    priceDisplay = isFree ? 'Free' : `$${event.ticketPrice}`;
+                  } else if (event.price) {
+                    // Legacy structure
+                    isFree = event.price === 'Free' || event.price === '0' || event.price === 0;
+                    priceDisplay = isFree ? 'Free' : `$${event.price}`;
+                  }
+
+                  return priceDisplay ? (
+                    <Chip
+                      icon={<AttachMoney />}
+                      label={priceDisplay}
+                      variant="outlined"
+                      color={isFree ? "success" : "secondary"}
+                    />
+                  ) : null;
+                })()}
+                {/* Capacity Information */}
+                {event.maxAttendees && (
                   <Chip
-                    icon={<AttachMoney />}
-                    label={event.price === 'Free' ? 'Free' : `$${event.price}`}
-                    variant="outlined"
-                    color="secondary"
-                  />
-                )}
-                {event.createdAt && (
-                  <Chip
-                    icon={<CalendarToday />}
-                    label={new Date(event.createdAt.seconds * 1000).toLocaleDateString()}
+                    icon={<Group />}
+                    label={`Max: ${event.maxAttendees}`}
                     size="small"
                     variant="outlined"
-                    color="secondary"
+                    color="info"
+                  />
+                )}
+                {event.attendees !== undefined && (
+                  <Chip
+                    icon={<Group />}
+                    label={`${event.attendees} registered`}
+                    size="small"
+                    variant="outlined"
+                    color="info"
                   />
                 )}
               </Box>
@@ -307,12 +366,13 @@ const EventDetailPage = () => {
                 <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                   Event Information
                 </Typography>
-                
-                {event.date && (
+
+                {/* Date and Time */}
+                {(event.eventDate || event.date) && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
                       icon={<CalendarToday />}
-                      label={formatDate(event.date)}
+                      label={formatDate(event.eventDate || event.date)}
                       variant="outlined"
                       sx={{
                         borderColor: theme.palette.primary.main,
@@ -324,12 +384,32 @@ const EventDetailPage = () => {
                     />
                   </Box>
                 )}
-                
-                {event.time && (
+
+                {/* End Date if different */}
+                {event.endDate && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
-                      icon={<Schedule />}
-                      label={formatTime(event.time)}
+                      icon={<CalendarToday />}
+                      label={`Ends: ${formatDate(event.endDate)}`}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        borderColor: theme.palette.primary.light,
+                        color: theme.palette.primary.main,
+                        '& .MuiChip-icon': {
+                          color: theme.palette.primary.main
+                        }
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {/* Start Time */}
+                {(event.eventTime || event.time) && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Chip
+                      icon={<AccessTime />}
+                      label={formatTime(event.eventTime || event.time)}
                       variant="outlined"
                       sx={{
                         borderColor: theme.palette.info.main,
@@ -342,31 +422,77 @@ const EventDetailPage = () => {
                   </Box>
                 )}
 
-                {event.location && (
+                {/* End Time */}
+                {event.endTime && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
-                      icon={<LocationOn />}
-                      label={event.location}
+                      icon={<AccessTime />}
+                      label={`Ends: ${formatTime(event.endTime)}`}
                       variant="outlined"
+                      size="small"
                       sx={{
-                        borderColor: theme.palette.text.secondary,
-                        color: theme.palette.text.secondary,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
+                        borderColor: theme.palette.info.light,
+                        color: theme.palette.info.main,
                         '& .MuiChip-icon': {
-                          color: theme.palette.text.secondary
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: theme.shadows[2],
-                          backgroundColor: 'rgba(108, 117, 125, 0.1)'
+                          color: theme.palette.info.main
                         }
                       }}
-                      {...getClickableChipProps('address', event.location)}
                     />
                   </Box>
                 )}
 
+                {/* Location */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Chip
+                    icon={<LocationOn />}
+                    label={getLocationDisplay(event)}
+                    variant="outlined"
+                    sx={{
+                      borderColor: theme.palette.text.secondary,
+                      color: theme.palette.text.secondary,
+                      cursor: event.location?.isOnline ? 'default' : 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      '& .MuiChip-icon': {
+                        color: theme.palette.text.secondary
+                      },
+                      '&:hover': !event.location?.isOnline ? {
+                        transform: 'translateY(-1px)',
+                        boxShadow: theme.shadows[2],
+                        backgroundColor: 'rgba(108, 117, 125, 0.1)'
+                      } : {}
+                    }}
+                    {...(!event.location?.isOnline && event.location?.address ?
+                      getClickableChipProps('address', event.location.address) : {})}
+                  />
+                </Box>
+
+                {/* Online Link for Online Events */}
+                {event.location?.isOnline && event.location?.onlineLink && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Chip
+                      icon={<Language />}
+                      label="Join Online"
+                      variant="outlined"
+                      sx={{
+                        borderColor: theme.palette.success.main,
+                        color: theme.palette.success.main,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                        '& .MuiChip-icon': {
+                          color: theme.palette.success.main
+                        },
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                        }
+                      }}
+                      onClick={() => window.open(event.location.onlineLink, '_blank')}
+                    />
+                  </Box>
+                )}
+
+                {/* Organizer */}
                 {event.organizer && (
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
@@ -384,6 +510,62 @@ const EventDetailPage = () => {
                   </Box>
                 )}
               </Box>
+
+              {/* Contact Information */}
+              {(event.contactEmail || event.contactPhone) && (
+                <>
+                  <Divider sx={{ mb: 3 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
+                    Contact Information
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+                    {event.contactEmail && (
+                      <Chip
+                        icon={<Email />}
+                        label={event.contactEmail}
+                        variant="outlined"
+                        sx={{
+                          borderColor: theme.palette.info.main,
+                          color: theme.palette.info.main,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease-in-out',
+                          '& .MuiChip-icon': {
+                            color: theme.palette.info.main
+                          },
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: theme.shadows[2],
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)'
+                          }
+                        }}
+                        {...getClickableChipProps('email', event.contactEmail)}
+                      />
+                    )}
+                    {event.contactPhone && (
+                      <Chip
+                        icon={<Phone />}
+                        label={event.contactPhone}
+                        variant="outlined"
+                        sx={{
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease-in-out',
+                          '& .MuiChip-icon': {
+                            color: theme.palette.success.main
+                          },
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: theme.shadows[2],
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                          }
+                        }}
+                        {...getClickableChipProps('phone', event.contactPhone)}
+                      />
+                    )}
+                  </Box>
+                </>
+              )}
 
               {/* Description */}
               {event.description && (
@@ -409,31 +591,65 @@ const EventDetailPage = () => {
               )}
 
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                {event.link && (
+              <Stack direction="row" spacing={2} sx={{ mt: 3, flexWrap: 'wrap', gap: 1 }}>
+                {/* Registration Button - supports both new and legacy structures */}
+                {(event.registrationUrl || event.link) && (
                   <Button
                     variant="contained"
                     startIcon={<OpenInNew />}
-                    onClick={handleRegister}
+                    onClick={() => {
+                      const url = event.registrationUrl || event.link;
+                      window.open(url, "_blank", "noopener,noreferrer");
+                    }}
                     sx={{
                       py: 1.5,
                       px: 3,
                       fontSize: "1rem",
                       fontWeight: "bold",
                       textTransform: "none",
-                      borderRadius: 3,
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                      boxShadow: theme.shadows[4],
+                      borderRadius: 2,
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      boxShadow: theme.shadows[2],
                       '&:hover': {
-                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.secondary.dark} 100%)`,
-                        transform: 'translateY(-2px)',
-                        boxShadow: theme.shadows[6],
+                        bgcolor: theme.palette.primary.dark,
+                        transform: 'translateY(-1px)',
+                        boxShadow: theme.shadows[4],
                       }
                     }}
                   >
                     Register Now
                   </Button>
                 )}
+
+                {/* Online Event Join Button */}
+                {event.location?.isOnline && event.location?.onlineLink && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Language />}
+                    onClick={() => window.open(event.location.onlineLink, "_blank", "noopener,noreferrer")}
+                    sx={{
+                      py: 1.5,
+                      px: 3,
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      borderRadius: 2,
+                      bgcolor: theme.palette.success.main,
+                      color: theme.palette.success.contrastText,
+                      boxShadow: theme.shadows[2],
+                      '&:hover': {
+                        bgcolor: theme.palette.success.dark,
+                        transform: 'translateY(-1px)',
+                        boxShadow: theme.shadows[4],
+                      }
+                    }}
+                  >
+                    Join Online
+                  </Button>
+                )}
+
+                {/* Share Button */}
                 <Button
                   variant="outlined"
                   startIcon={<Share />}
@@ -444,13 +660,13 @@ const EventDetailPage = () => {
                     fontSize: "1rem",
                     fontWeight: "bold",
                     textTransform: "none",
-                    borderRadius: 3,
+                    borderRadius: 2,
                     borderColor: theme.palette.primary.main,
                     color: theme.palette.primary.main,
                     '&:hover': {
                       borderColor: theme.palette.primary.dark,
-                      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-                      transform: 'translateY(-2px)',
+                      backgroundColor: theme.palette.primary.main + '10',
+                      transform: 'translateY(-1px)',
                     }
                   }}
                 >

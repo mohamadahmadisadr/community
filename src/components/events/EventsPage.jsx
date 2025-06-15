@@ -14,14 +14,13 @@ import {
   Button,
   useTheme
 } from '@mui/material';
-import { Add, Search, CalendarToday, LocationOn, Event, AccessTime, AttachMoney, Share, Visibility } from '@mui/icons-material';
+import { Add, Search, CalendarToday, LocationOn, Event, AccessTime, AttachMoney, Visibility } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import usePagination from '../../hooks/usePagination';
 import InfiniteScrollComponent from '../../components/common/InfiniteScrollComponent';
-import { getClickableChipProps } from '../../utils/contactUtils';
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -58,10 +57,16 @@ const EventsPage = () => {
   const filteredEvents = events.filter(
     (event) =>
       event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.organizer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // New database structure
+      event.location?.venue?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
-      event.city?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
+      event.location?.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Legacy structure
+      event.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -81,9 +86,19 @@ const EventsPage = () => {
     resetPagination();
   }, [searchQuery, resetPagination]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+
+    // Handle both Firestore timestamp and regular Date objects
+    let date;
+    if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else {
+      date = new Date(timestamp);
+    }
+
     return date.toLocaleDateString('en-CA', {
       year: 'numeric',
       month: 'short',
@@ -101,26 +116,8 @@ const EventsPage = () => {
     return persianRegex.test(text) ? "'Vazir', sans-serif" : "'Roboto', sans-serif";
   };
 
-  const eventColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F8B500', '#FF8A80'];
-
   const handleViewDetails = (event) => {
     navigate(`/event/${event.id}`);
-  };
-
-  const handleShare = (event) => {
-    const eventUrl = `${window.location.origin}/event/${event.id}`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: event.title,
-        text: `Check out this event: ${event.title}`,
-        url: eventUrl,
-      });
-    } else {
-      navigator.clipboard.writeText(eventUrl).then(() => {
-        alert("Event link copied to clipboard!");
-      });
-    }
   };
 
   return (
@@ -153,7 +150,7 @@ const EventsPage = () => {
 
         {/* Events Grid */}
         <Grid container spacing={3}>
-          {displayedEvents.map((event, index) => (
+          {displayedEvents.map((event) => (
             <Grid item xs={12} sm={6} md={4} key={event.id}>
               <Card
                 sx={{
@@ -210,18 +207,21 @@ const EventsPage = () => {
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                       <CalendarToday sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
-                      {formatDate(event.date)}
-                      {event.time && (
+                      {formatDate(event.eventDate || event.date)}
+                      {(event.eventTime || event.time) && (
                         <>
                           {' • '}
                           <AccessTime sx={{ fontSize: 16, mx: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
-                          {event.time}
+                          {event.eventTime || event.time}
                         </>
                       )}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       <LocationOn sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'middle', color: theme.palette.text.secondary }} />
-                      {`${event.location?.name || event.location}, ${event.location?.city || event.city}`}
+                      {event.location?.isOnline ? 'Online Event' :
+                       event.location?.venue ? `${event.location.venue}, ${event.location.city || ''}` :
+                       event.location?.name ? `${event.location.name}, ${event.location.city || event.city || ''}` :
+                       typeof event.location === 'string' ? event.location : 'Location TBD'}
                     </Typography>
                   </Box>
 
@@ -247,7 +247,7 @@ const EventsPage = () => {
                     </Typography>
                   )}
 
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
                     {event.category && (
                       <Chip
                         label={event.category}
@@ -260,23 +260,39 @@ const EventsPage = () => {
                         }}
                       />
                     )}
-                    {event.price && (
-                      <Chip
-                        icon={<AttachMoney />}
-                        label={event.price === 'Free' ? 'Free' : `$${event.price}`}
-                        size="small"
-                        color={event.price === 'Free' ? 'success' : 'primary'}
-                        sx={{
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            fontSize: 16
-                          },
-                          bgcolor: event.price === 'Free' ? theme.palette.success.light : theme.palette.primary.light,
-                          borderColor: event.price === 'Free' ? theme.palette.success.main : theme.palette.primary.main,
-                          color: event.price === 'Free' ? theme.palette.success.contrastText : theme.palette.primary.contrastText
-                        }}
-                      />
-                    )}
+                    {(() => {
+                      // Determine price display - prioritize new ticketPrice field
+                      let priceDisplay = null;
+                      let isFree = false;
+
+                      if (event.ticketPrice !== undefined && event.ticketPrice !== null) {
+                        // New database structure
+                        isFree = event.ticketPrice === 0;
+                        priceDisplay = isFree ? 'Free' : `$${event.ticketPrice}`;
+                      } else if (event.price && event.price !== '') {
+                        // Legacy structure
+                        isFree = event.price === 'Free' || event.price === '0' || event.price === 0;
+                        priceDisplay = isFree ? 'Free' : `$${event.price}`;
+                      }
+
+                      return priceDisplay ? (
+                        <Chip
+                          icon={!isFree ? <AttachMoney /> : undefined}
+                          label={priceDisplay}
+                          size="small"
+                          color={isFree ? "success" : "primary"}
+                          sx={{
+                            fontWeight: 'bold',
+                            '& .MuiChip-icon': {
+                              fontSize: 16
+                            },
+                            bgcolor: isFree ? theme.palette.success.light : theme.palette.primary.light,
+                            borderColor: isFree ? theme.palette.success.main : theme.palette.primary.main,
+                            color: isFree ? theme.palette.success.contrastText : theme.palette.primary.contrastText
+                          }}
+                        />
+                      ) : null;
+                    })()}
                   </Box>
 
                   {/* Action Button */}

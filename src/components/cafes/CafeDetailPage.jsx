@@ -11,8 +11,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Card,
-  CardContent,
   CardMedia,
   Chip,
   Avatar,
@@ -24,7 +22,6 @@ import {
   LocalCafe,
   LocationOn,
   Phone,
-  Schedule,
   Share,
   Wifi,
   CalendarToday,
@@ -241,7 +238,6 @@ const CafeDetailPage = () => {
           <Box
             sx={{
               height: 250,
-              backgroundColor: 'grey.100',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -282,371 +278,54 @@ const CafeDetailPage = () => {
               )}
 
               {/* Details */}
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
-                {cafe.specialty && cafe.specialty.trim() !== '' && (
-                  <Chip
-                    label={cafe.specialty}
-                    sx={{
-                      bgcolor: theme.palette.success.light,
-                      color: theme.palette.success.main,
-                      fontWeight: 'bold'
-                    }}
-                  />
-                )}
-                {cafe.priceRange && cafe.priceRange.trim() !== '' && cafe.priceRange !== '$$' && (
-                  <Chip
-                    icon={<AttachMoney />}
-                    label={cafe.priceRange}
-                    variant="outlined"
-                    sx={{
-                      borderColor: theme.palette.success.main,
-                      color: theme.palette.success.main,
-                      '& .MuiChip-icon': {
-                        color: theme.palette.success.main
-                      }
-                    }}
-                  />
-                )}
-                {cafe.createdAt && (
-                  <Chip
-                    icon={<CalendarToday />}
-                    label={new Date(cafe.createdAt.seconds * 1000).toLocaleDateString()}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      borderColor: theme.palette.text.secondary,
-                      color: theme.palette.text.secondary,
-                      '& .MuiChip-icon': {
-                        color: theme.palette.text.secondary
-                      }
-                    }}
-                  />
-                )}
-              </Box>
-
-              <Divider sx={{ mb: 3 }} />
-
-              {/* Features */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
-                  Features
-                </Typography>
-
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                  {cafe.hasWifi && (
+              {(cafe.specialty || cafe.priceRange || cafe.createdAt) && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+                  {cafe.specialty && cafe.specialty.trim() !== '' && (
                     <Chip
-                      icon={<Wifi />}
-                      label="WiFi"
+                      label={cafe.specialty}
                       sx={{
-                        bgcolor: theme.palette.info.main,
-                        color: 'white',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
-                    />
-                  )}
-                  {cafe.hasOutdoorSeating && (
-                    <Chip
-                      label="Outdoor Seating"
-                      sx={{
-                        bgcolor: theme.palette.success.main,
-                        color: 'white',
+                        bgcolor: theme.palette.success.light,
+                        color: theme.palette.success.dark,
                         fontWeight: 'bold'
                       }}
                     />
                   )}
-                  {cafe.hasParking && (
+                  {cafe.priceRange && cafe.priceRange.trim() !== '' && cafe.priceRange !== '$$' && (
                     <Chip
-                      icon={<DirectionsCar />}
-                      label="Parking"
-                      sx={{
-                        bgcolor: theme.palette.primary.main,
-                        color: 'white',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
-                    />
-                  )}
-                  {cafe.petFriendly && (
-                    <Chip
-                      icon={<Pets />}
-                      label="Pet Friendly"
-                      sx={{
-                        bgcolor: theme.palette.warning.main,
-                        color: 'white',
-                        fontWeight: 'bold',
-                        '& .MuiChip-icon': {
-                          color: 'white'
-                        }
-                      }}
-                    />
-                  )}
-                </Box>
-              </Box>
-
-              <Divider sx={{ mb: 3 }} />
-
-              {/* Contact Information */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
-                  Contact Information
-                </Typography>
-
-                {(cafe.location?.address || cafe.address) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Chip
-                      icon={<LocationOn />}
-                      label={`${cafe.location?.address || cafe.address}, ${cafe.location?.city || cafe.city}`}
-                      variant="outlined"
-                      sx={{
-                        borderColor: theme.palette.text.secondary,
-                        color: theme.palette.text.secondary,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        '& .MuiChip-icon': {
-                          color: theme.palette.text.secondary
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: theme.shadows[2],
-                          backgroundColor: 'rgba(108, 117, 125, 0.1)'
-                        }
-                      }}
-                      {...getClickableChipProps('address', cafe.location?.address || cafe.address, cafe.location?.city || cafe.city)}
-                    />
-                  </Box>
-                )}
-
-                {(cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Chip
-                      icon={<Phone />}
-                      label={cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone}
+                      icon={<AttachMoney />}
+                      label={cafe.priceRange}
                       variant="outlined"
                       sx={{
                         borderColor: theme.palette.success.main,
                         color: theme.palette.success.main,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
                         '& .MuiChip-icon': {
                           color: theme.palette.success.main
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: theme.shadows[2],
-                          backgroundColor: 'rgba(150, 206, 180, 0.1)'
                         }
                       }}
-                      {...getClickableChipProps('phone', cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone)}
                     />
-                  </Box>
-                )}
-
-                {(cafe.contact?.email || cafe.contactInfo?.email) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  )}
+                  {cafe.createdAt && (
                     <Chip
-                      icon={<Email />}
-                      label={cafe.contact?.email || cafe.contactInfo?.email}
+                      icon={<CalendarToday />}
+                      label={new Date(cafe.createdAt.seconds * 1000).toLocaleDateString()}
+                      size="small"
                       variant="outlined"
                       sx={{
-                        borderColor: theme.palette.error.main,
-                        color: theme.palette.error.main,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
+                        borderColor: theme.palette.text.secondary,
+                        color: theme.palette.text.secondary,
                         '& .MuiChip-icon': {
-                          color: theme.palette.error.main
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: theme.shadows[2],
-                          backgroundColor: 'rgba(220, 53, 69, 0.1)'
+                          color: theme.palette.text.secondary
                         }
                       }}
-                      {...getClickableChipProps('email', cafe.contact?.email || cafe.contactInfo?.email)}
                     />
-                  </Box>
-                )}
-
-                {(cafe.contact?.website || cafe.contactInfo?.website) && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Chip
-                      icon={<Language />}
-                      label="Visit Website"
-                      variant="outlined"
-                      sx={{
-                        borderColor: theme.palette.info.main,
-                        color: theme.palette.info.main,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
-                        '& .MuiChip-icon': {
-                          color: theme.palette.info.main
-                        },
-                        '&:hover': {
-                          transform: 'translateY(-1px)',
-                          boxShadow: theme.shadows[2],
-                          backgroundColor: 'rgba(23, 162, 184, 0.1)'
-                        }
-                      }}
-                      onClick={() => window.open(cafe.contact?.website || cafe.contactInfo?.website, '_blank')}
-                      title={`Visit ${cafe.contact?.website || cafe.contactInfo?.website}`}
-                    />
-                  </Box>
-                )}
-
-              </Box>
-
-              {/* Hours */}
-              {cafe.hours && Object.values(cafe.hours).some(h => h && h.trim() !== '') && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
-                    Hours
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {Object.entries(cafe.hours).map(([day, hours]) => (
-                      hours && hours.trim() !== '' && (
-                        <Box key={day} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold', textTransform: 'capitalize', minWidth: 80 }}>
-                            {day}:
-                          </Typography>
-                          <Chip
-                            icon={<AccessTime />}
-                            label={hours}
-                            size="small"
-                            sx={{
-                              bgcolor: theme.palette.success.light,
-                              color: theme.palette.success.main,
-                              fontWeight: 'bold',
-                              '& .MuiChip-icon': {
-                                color: theme.palette.success.main
-                              }
-                            }}
-                          />
-                        </Box>
-                      )
-                    ))}
-                  </Box>
+                  )}
                 </Box>
               )}
-
-              {/* Features */}
-              {cafe.features && cafe.features.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
-                    Features & Amenities
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {cafe.features.map((feature, index) => {
-                      let icon = <Dining />;
-                      let color = theme.palette.primary.main;
-
-                      if (feature.toLowerCase().includes('wifi')) {
-                        icon = <Wifi />;
-                        color = theme.palette.info.main;
-                      } else if (feature.toLowerCase().includes('parking')) {
-                        icon = <DirectionsCar />;
-                        color = theme.palette.primary.main;
-                      } else if (feature.toLowerCase().includes('pet')) {
-                        icon = <Pets />;
-                        color = theme.palette.warning.main;
-                      }
-
-                      return (
-                        <Chip
-                          key={index}
-                          icon={icon}
-                          label={feature.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          sx={{
-                            bgcolor: `${color}15`,
-                            color: color,
-                            fontWeight: 'bold',
-                            '& .MuiChip-icon': {
-                              color: color
-                            }
-                          }}
-                        />
-                      );
-                    })}
-                  </Box>
-                </Box>
-              )}
-
-              {/* Payment Methods */}
-              {cafe.paymentMethods && cafe.paymentMethods.length > 0 && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
-                    Payment Methods
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {cafe.paymentMethods.map((method, index) => (
-                      <Chip
-                        key={index}
-                        icon={<Payment />}
-                        label={method.replace(/\b\w/g, l => l.toUpperCase())}
-                        sx={{
-                          bgcolor: theme.palette.warning.light,
-                          color: theme.palette.warning.main,
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: theme.palette.warning.main
-                          }
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              )}
-
-              {/* Status and Verification */}
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
-                {cafe.verified && (
-                  <Chip
-                    icon={<CheckCircle />}
-                    label="Verified"
-                    sx={{
-                      bgcolor: theme.palette.success.main,
-                      color: 'white',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: 'white'
-                      }
-                    }}
-                  />
-                )}
-                {cafe.featured && (
-                  <Chip
-                    icon={<Star />}
-                    label="Featured"
-                    sx={{
-                      bgcolor: '#ffd700',
-                      color: '#000',
-                      fontWeight: 'bold',
-                      '& .MuiChip-icon': {
-                        color: '#000'
-                      }
-                    }}
-                  />
-                )}
-                {cafe.status && (
-                  <Chip
-                    label={cafe.status.replace(/\b\w/g, l => l.toUpperCase())}
-                    size="small"
-                    sx={{
-                      bgcolor: cafe.status === 'approved' ? theme.palette.success.light : theme.palette.text.disabled,
-                      color: cafe.status === 'approved' ? theme.palette.success.main : theme.palette.text.secondary,
-                      fontWeight: 'bold'
-                    }}
-                  />
-                )}
-              </Box>
 
               {/* Description */}
               {cafe.description && (
                 <>
-                  <Divider sx={{ mb: 3 }} />
+                  {(cafe.specialty || cafe.priceRange || cafe.createdAt) && <Divider sx={{ mb: 3 }} />}
                   <Typography
                     variant="body1"
                     sx={{
@@ -663,55 +342,262 @@ const CafeDetailPage = () => {
                 </>
               )}
 
+              {/* Features */}
+              {cafe.features && cafe.features.length > 0 && (
+                <>
+                  {cafe.description && <Divider sx={{ mb: 3 }} />}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
+                      Features & Amenities
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {cafe.features.map((feature, index) => {
+                        let icon = <Dining />;
+                        let color = theme.palette.primary.main;
+
+                        if (feature.toLowerCase().includes('wifi')) {
+                          icon = <Wifi />;
+                          color = theme.palette.info.main;
+                        } else if (feature.toLowerCase().includes('parking')) {
+                          icon = <DirectionsCar />;
+                          color = theme.palette.primary.main;
+                        } else if (feature.toLowerCase().includes('pet')) {
+                          icon = <Pets />;
+                          color = theme.palette.warning.main;
+                        }
+
+                        return (
+                          <Chip
+                            key={index}
+                            icon={icon}
+                            label={feature.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            sx={{
+                              bgcolor: `${color}15`,
+                              color: color,
+                              fontWeight: 'bold',
+                              '& .MuiChip-icon': {
+                                color: color
+                              }
+                            }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                </>
+              )}
+
+              {/* Hours */}
+              {cafe.hours && Object.values(cafe.hours).some(h => h && h.trim() !== '') && (
+                <>
+                  {(cafe.features?.length > 0 || cafe.description) && <Divider sx={{ mb: 3 }} />}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
+                      Hours
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {Object.entries(cafe.hours).map(([day, hours]) => (
+                        hours && hours.trim() !== '' && (
+                          <Box key={day} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold', textTransform: 'capitalize', minWidth: 80 }}>
+                              {day}:
+                            </Typography>
+                            <Chip
+                              icon={<AccessTime />}
+                              label={hours}
+                              size="small"
+                              sx={{
+                                bgcolor: theme.palette.success.light,
+                                color: theme.palette.success.main,
+                                fontWeight: 'bold',
+                                '& .MuiChip-icon': {
+                                  color: theme.palette.success.main
+                                }
+                              }}
+                            />
+                          </Box>
+                        )
+                      ))}
+                    </Box>
+                  </Box>
+                </>
+              )}
+
+              {/* Contact Information */}
+              {((cafe.location?.address || cafe.address) || 
+                (cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) || 
+                (cafe.contact?.email || cafe.contactInfo?.email) ||
+                (cafe.contact?.website || cafe.contactInfo?.website)) && (
+                <>
+                  {(cafe.hours || cafe.features?.length > 0 || cafe.description) && <Divider sx={{ mb: 3 }} />}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
+                      Contact Information
+                    </Typography>
+
+                    {(cafe.location?.address || cafe.address) && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Chip
+                          icon={<LocationOn />}
+                          label={`${cafe.location?.address || cafe.address}, ${cafe.location?.city || cafe.city}`}
+                          variant="outlined"
+                          sx={{
+                            borderColor: theme.palette.text.secondary,
+                            color: theme.palette.text.secondary,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            '& .MuiChip-icon': {
+                              color: theme.palette.text.secondary
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: theme.shadows[2],
+                              backgroundColor: 'rgba(108, 117, 125, 0.1)'
+                            }
+                          }}
+                          {...getClickableChipProps('address', cafe.location?.address || cafe.address, cafe.location?.city || cafe.city)}
+                        />
+                      </Box>
+                    )}
+
+                    {(cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Chip
+                          icon={<Phone />}
+                          label={cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone}
+                          variant="outlined"
+                          sx={{
+                            borderColor: theme.palette.success.main,
+                            color: theme.palette.success.main,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            '& .MuiChip-icon': {
+                              color: theme.palette.success.main
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: theme.shadows[2],
+                              backgroundColor: 'rgba(150, 206, 180, 0.1)'
+                            }
+                          }}
+                          {...getClickableChipProps('phone', cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone)}
+                        />
+                      </Box>
+                    )}
+
+                    {(cafe.contact?.email || cafe.contactInfo?.email) && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Chip
+                          icon={<Email />}
+                          label={cafe.contact?.email || cafe.contactInfo?.email}
+                          variant="outlined"
+                          sx={{
+                            borderColor: theme.palette.error.main,
+                            color: theme.palette.error.main,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            '& .MuiChip-icon': {
+                              color: theme.palette.error.main
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: theme.shadows[2],
+                              backgroundColor: 'rgba(220, 53, 69, 0.1)'
+                            }
+                          }}
+                          {...getClickableChipProps('email', cafe.contact?.email || cafe.contactInfo?.email)}
+                        />
+                      </Box>
+                    )}
+
+                    {(cafe.contact?.website || cafe.contactInfo?.website) && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Chip
+                          icon={<Language />}
+                          label="Visit Website"
+                          variant="outlined"
+                          sx={{
+                            borderColor: theme.palette.info.main,
+                            color: theme.palette.info.main,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease-in-out',
+                            '& .MuiChip-icon': {
+                              color: theme.palette.info.main
+                            },
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              boxShadow: theme.shadows[2],
+                              backgroundColor: 'rgba(23, 162, 184, 0.1)'
+                            }
+                          }}
+                          onClick={() => window.open(cafe.contact?.website || cafe.contactInfo?.website, '_blank')}
+                          title={`Visit ${cafe.contact?.website || cafe.contactInfo?.website}`}
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                </>
+              )}
+
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                {(cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) && (
-                  <Button
-                    variant="contained"
-                    startIcon={<Phone />}
-                    onClick={handleCall}
-                    sx={{
-                      py: 1.5,
-                      px: 3,
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                      borderRadius: 3,
-                      background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
-                      boxShadow: '0 4px 20px rgba(150, 206, 180, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #74b9a0 0%, #ffd93d 100%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 25px rgba(150, 206, 180, 0.4)',
-                      }
-                    }}
-                  >
-                    Call Now
-                  </Button>
-                )}
-                <Button
-                  variant="outlined"
-                  startIcon={<Share />}
-                  onClick={handleShare}
-                  sx={{
-                    py: 1.5,
-                    px: 3,
-                    fontSize: "1rem",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    borderRadius: 3,
-                    borderColor: theme.palette.success.main,
-                    color: theme.palette.success.main,
-                    '&:hover': {
-                      borderColor: '#74b9a0',
-                      backgroundColor: 'rgba(150, 206, 180, 0.1)',
-                      transform: 'translateY(-2px)',
-                    }
-                  }}
-                >
-                  Share
-                </Button>
-              </Stack>
+              {((cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) || cafe.id) && (
+                <>
+                  {((cafe.location?.address || cafe.address) || 
+                    (cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) || 
+                    (cafe.contact?.email || cafe.contactInfo?.email) ||
+                    (cafe.contact?.website || cafe.contactInfo?.website)) && <Divider sx={{ mb: 3 }} />}
+                  <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                    {(cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) && (
+                      <Button
+                        variant="contained"
+                        startIcon={<Phone />}
+                        onClick={handleCall}
+                        sx={{
+                          py: 1.5,
+                          px: 3,
+                          fontSize: "1rem",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                          borderRadius: 3,
+                          background: 'linear-gradient(135deg, #96ceb4 0%, #ffeaa7 100%)',
+                          boxShadow: '0 4px 20px rgba(150, 206, 180, 0.3)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #74b9a0 0%, #ffd93d 100%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 25px rgba(150, 206, 180, 0.4)',
+                          }
+                        }}
+                      >
+                        Call Now
+                      </Button>
+                    )}
+                    {cafe.id && (
+                      <Button
+                        variant="outlined"
+                        startIcon={<Share />}
+                        onClick={handleShare}
+                        sx={{
+                          py: 1.5,
+                          px: 3,
+                          fontSize: "1rem",
+                          fontWeight: "bold",
+                          textTransform: "none",
+                          borderRadius: 3,
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          '&:hover': {
+                            borderColor: '#74b9a0',
+                            backgroundColor: 'rgba(150, 206, 180, 0.1)',
+                            transform: 'translateY(-2px)',
+                          }
+                        }}
+                      >
+                        Share
+                      </Button>
+                    )}
+                  </Stack>
+                </>
+              )}
 
               {/* Comments Section */}
               <CommentsSection

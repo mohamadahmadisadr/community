@@ -95,7 +95,6 @@ const CommentsSection = ({ itemId, itemType }) => {
         status: 'approved' // Auto-approve for now, can add moderation later
       });
       setNewComment('');
-      setShowAddComment(false);
       showTelegramAlert('Comment added successfully!');
     } catch (error) {
       showTelegramAlert('Failed to add comment. Please try again.');

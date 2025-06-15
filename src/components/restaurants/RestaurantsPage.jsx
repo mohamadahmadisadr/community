@@ -49,8 +49,21 @@ const RestaurantsPage = () => {
   const filteredRestaurants = restaurants.filter(
     (restaurant) =>
       restaurant.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       restaurant.cuisine?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      restaurant.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      restaurant.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // New database structure
+      restaurant.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.location?.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.location?.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Legacy structure
+      restaurant.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      restaurant.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Features search
+      restaurant.features?.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      // Payment methods search
+      restaurant.paymentMethods?.some(method => method.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getTextDirection = (text) => {
@@ -164,21 +177,43 @@ const RestaurantsPage = () => {
                     </Box>
                   )}
 
-                  {restaurant.cuisine && (
-                    <Box sx={{ mb: 2 }}>
+                  {/* Cuisine and Category */}
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                    {restaurant.cuisine && (
                       <Chip
                         label={restaurant.cuisine}
                         size="small"
                         variant="outlined"
                         color="primary"
                       />
-                    </Box>
-                  )}
+                    )}
+                    {restaurant.category && restaurant.category !== 'Restaurant' && (
+                      <Chip
+                        label={restaurant.category}
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    )}
+                  </Box>
 
+                  {/* Location */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
                       icon={<LocationOn />}
-                      label={`${restaurant.address}, ${restaurant.city}`}
+                      label={(() => {
+                        // Support both new and legacy location structures
+                        if (restaurant.location?.address && restaurant.location?.city) {
+                          return `${restaurant.location.address}, ${restaurant.location.city}`;
+                        } else if (restaurant.address && restaurant.city) {
+                          return `${restaurant.address}, ${restaurant.city}`;
+                        } else if (restaurant.location?.city) {
+                          return restaurant.location.city;
+                        } else if (restaurant.city) {
+                          return restaurant.city;
+                        }
+                        return 'Location not specified';
+                      })()}
                       size="small"
                       variant="outlined"
                       sx={{
@@ -191,11 +226,12 @@ const RestaurantsPage = () => {
                     />
                   </Box>
 
-                  {restaurant.phone && (
+                  {/* Phone - support both new and legacy structures */}
+                  {(restaurant.contactInfo?.phone || restaurant.contact?.phone || restaurant.phone) && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Chip
                         icon={<Phone />}
-                        label={restaurant.phone}
+                        label={restaurant.contactInfo?.phone || restaurant.contact?.phone || restaurant.phone}
                         size="small"
                         variant="outlined"
                         sx={{
@@ -209,8 +245,32 @@ const RestaurantsPage = () => {
                     </Box>
                   )}
 
-                  {restaurant.hours && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  {/* Hours - show today's hours if available */}
+                  {restaurant.hours && typeof restaurant.hours === 'object' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Chip
+                        icon={<Schedule />}
+                        label={(() => {
+                          const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                          const todayHours = restaurant.hours[today];
+                          return todayHours || 'Hours available';
+                        })()}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          '& .MuiChip-icon': {
+                            color: theme.palette.success.main
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
+
+                  {/* Legacy hours support */}
+                  {restaurant.hours && typeof restaurant.hours === 'string' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Chip
                         icon={<Schedule />}
                         label={restaurant.hours}
@@ -224,6 +284,35 @@ const RestaurantsPage = () => {
                           }
                         }}
                       />
+                    </Box>
+                  )}
+
+                  {/* Features - show first few features */}
+                  {restaurant.features && restaurant.features.length > 0 && (
+                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+                      {restaurant.features.slice(0, 3).map((feature, featureIndex) => (
+                        <Chip
+                          key={featureIndex}
+                          label={feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(111, 66, 193, 0.1)',
+                            color: theme.palette.primary.main,
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      ))}
+                      {restaurant.features.length > 3 && (
+                        <Chip
+                          label={`+${restaurant.features.length - 3} more`}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(108, 117, 125, 0.1)',
+                            color: theme.palette.text.secondary,
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      )}
                     </Box>
                   )}
 

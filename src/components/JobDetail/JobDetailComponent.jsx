@@ -11,8 +11,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Card,
-  CardContent,
   CardMedia,
   Chip,
   Avatar,
@@ -26,7 +24,12 @@ import {
   Business,
   Share,
   OpenInNew,
-  CalendarToday
+  CalendarToday,
+  Email,
+  Phone,
+  AttachMoney,
+  WorkOutline,
+  Category
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
@@ -70,15 +73,6 @@ const JobDetailPage = () => {
   const getFontFamily = (text) => {
     const persianRegex = /[\u0600-\u06FF]/; // Matches Persian/Arabic characters
     return persianRegex.test(text) ? "'Vazir', sans-serif" : "'Roboto', sans-serif";
-  };
-
-  const handleApply = () => {
-    const applicationUrl = job.applicationLink || job.link;
-    if (applicationUrl && applicationUrl.trim() !== "") {
-      window.open(applicationUrl, "_blank", "noopener,noreferrer");
-    } else {
-      alert("No application link available for this job.");
-    }
   };
 
   const handleShare = () => {
@@ -253,24 +247,8 @@ const JobDetailPage = () => {
                 {job.title}
               </Typography>
 
-              {/* Location and Details */}
+              {/* Job Details */}
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
-                {(job.location?.city || job.city) && (job.location?.province || job.province) && (
-                  <Chip
-                    icon={<LocationOn />}
-                    label={`${job.location?.city || job.city}, ${job.location?.province || job.province}`}
-                    variant="outlined"
-                    color="primary"
-                  />
-                )}
-                {(job.location?.country || job.country) && (
-                  <Chip
-                    icon={<Business />}
-                    label={job.location?.country || job.country}
-                    variant="outlined"
-                    color="primary"
-                  />
-                )}
                 {job.company && (
                   <Chip
                     icon={<Business />}
@@ -278,15 +256,44 @@ const JobDetailPage = () => {
                     color="primary"
                   />
                 )}
-                {job.jobType && (
+                {job.category && job.category !== 'General' && (
                   <Chip
-                    label={job.jobType}
+                    icon={<Category />}
+                    label={job.category}
+                    variant="outlined"
+                    color="primary"
+                  />
+                )}
+                {/* Job Type - support both new 'type' and legacy 'jobType' */}
+                {(job.type || job.jobType) && (
+                  <Chip
+                    icon={<WorkOutline />}
+                    label={(job.type || job.jobType).charAt(0).toUpperCase() + (job.type || job.jobType).slice(1)}
                     color="secondary"
                   />
                 )}
-                {job.category && job.category !== 'General' && (
+                {/* Location */}
+                {job.location?.city && job.location?.province && (
                   <Chip
-                    label={job.category}
+                    icon={<LocationOn />}
+                    label={`${job.location.city}, ${job.location.province}`}
+                    variant="outlined"
+                    color="primary"
+                  />
+                )}
+                {/* Remote work indicator */}
+                {job.location?.remote && (
+                  <Chip
+                    label="Remote Available"
+                    variant="outlined"
+                    color="success"
+                  />
+                )}
+                {/* Legacy location support */}
+                {!job.location?.city && (job.city || job.province) && (
+                  <Chip
+                    icon={<LocationOn />}
+                    label={`${job.city || ''}, ${job.province || ''}`}
                     variant="outlined"
                     color="primary"
                   />
@@ -307,15 +314,35 @@ const JobDetailPage = () => {
               {/* Salary Information */}
               {job.salary && (job.salary.min || job.salary.max) && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Salary Range
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
+                    Salary Information
                   </Typography>
                   <Chip
-                    label={`${job.salary.min ? `$${job.salary.min.toLocaleString()}` : 'N/A'} - ${job.salary.max ? `$${job.salary.max.toLocaleString()}` : 'N/A'} ${job.salary.currency || 'CAD'} ${job.salary.type || 'annually'}`}
+                    icon={<AttachMoney />}
+                    label={(() => {
+                      const min = job.salary.min ? `$${job.salary.min.toLocaleString()}` : null;
+                      const max = job.salary.max ? `$${job.salary.max.toLocaleString()}` : null;
+                      const currency = job.salary.currency || 'CAD';
+                      const period = job.salary.period || job.salary.type || 'yearly'; // Support both new 'period' and legacy 'type'
+
+                      let salaryText = '';
+                      if (min && max) {
+                        salaryText = `${min} - ${max}`;
+                      } else if (min) {
+                        salaryText = `From ${min}`;
+                      } else if (max) {
+                        salaryText = `Up to ${max}`;
+                      }
+
+                      return `${salaryText} ${currency} ${period}`;
+                    })()}
                     color="primary"
                     sx={{
                       fontSize: '1rem',
-                      py: 1
+                      py: 1,
+                      '& .MuiChip-icon': {
+                        color: theme.palette.primary.main
+                      }
                     }}
                   />
                 </Box>
@@ -361,23 +388,51 @@ const JobDetailPage = () => {
               {/* Contact Information */}
               {(job.contactEmail || job.contactPhone) && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: theme.palette.text.primary }}>
                     Contact Information
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {job.contactEmail && (
                       <Chip
+                        icon={<Email />}
                         label={job.contactEmail}
-                        color="primary"
-                        sx={{ cursor: 'pointer' }}
+                        variant="outlined"
+                        sx={{
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease-in-out',
+                          borderColor: theme.palette.info.main,
+                          color: theme.palette.info.main,
+                          '& .MuiChip-icon': {
+                            color: theme.palette.info.main
+                          },
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: theme.shadows[2],
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)'
+                          }
+                        }}
                         {...getClickableChipProps('email', job.contactEmail)}
                       />
                     )}
                     {job.contactPhone && (
                       <Chip
+                        icon={<Phone />}
                         label={job.contactPhone}
-                        color="secondary"
-                        sx={{ cursor: 'pointer' }}
+                        variant="outlined"
+                        sx={{
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease-in-out',
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          '& .MuiChip-icon': {
+                            color: theme.palette.success.main
+                          },
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: theme.shadows[2],
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                          }
+                        }}
                         {...getClickableChipProps('phone', job.contactPhone)}
                       />
                     )}
@@ -404,18 +459,33 @@ const JobDetailPage = () => {
               </Typography>
 
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                {((job.applicationLink && job.applicationLink.trim() !== "") || (job.link && job.link.trim() !== "")) && (
+              <Stack direction="row" spacing={2} sx={{ mt: 3, flexWrap: 'wrap', gap: 1 }}>
+                {/* Application Button - supports both new and legacy structures */}
+                {((job.applicationUrl && job.applicationUrl.trim() !== "") ||
+                  (job.applicationLink && job.applicationLink.trim() !== "") ||
+                  (job.link && job.link.trim() !== "")) && (
                   <Button
                     variant="contained"
                     startIcon={<OpenInNew />}
-                    onClick={handleApply}
+                    onClick={() => {
+                      const url = job.applicationUrl || job.applicationLink || job.link;
+                      window.open(url, "_blank", "noopener,noreferrer");
+                    }}
                     sx={{
                       py: 1.5,
                       px: 3,
                       fontSize: "1rem",
-                      fontWeight: 500,
-                      textTransform: "none"
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      borderRadius: 2,
+                      bgcolor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
+                      boxShadow: theme.shadows[2],
+                      '&:hover': {
+                        bgcolor: theme.palette.primary.dark,
+                        transform: 'translateY(-1px)',
+                        boxShadow: theme.shadows[4],
+                      }
                     }}
                   >
                     Apply Now
@@ -423,16 +493,33 @@ const JobDetailPage = () => {
                 )}
 
                 {/* Fallback Apply Button when no link is available */}
-                {!((job.applicationLink && job.applicationLink.trim() !== "") || (job.link && job.link.trim() !== "")) && (
+                {!((job.applicationUrl && job.applicationUrl.trim() !== "") ||
+                   (job.applicationLink && job.applicationLink.trim() !== "") ||
+                   (job.link && job.link.trim() !== "")) && (
                   <Button
                     variant="contained"
                     startIcon={<OpenInNew />}
-                    onClick={() => alert("To apply for this job, please contact the employer directly or check the job description for application instructions.")}
+                    onClick={() => alert("To apply for this job, please contact the employer directly using the contact information provided above.")}
+                    sx={{
+                      py: 1.5,
+                      px: 3,
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      borderRadius: 2,
+                      bgcolor: theme.palette.secondary.main,
+                      color: theme.palette.secondary.contrastText,
+                      '&:hover': {
+                        bgcolor: theme.palette.secondary.dark,
+                        transform: 'translateY(-1px)',
+                      }
+                    }}
                   >
                     How to Apply
                   </Button>
                 )}
 
+                {/* Share Button */}
                 <Button
                   variant="outlined"
                   startIcon={<Share />}
@@ -441,8 +528,16 @@ const JobDetailPage = () => {
                     py: 1.5,
                     px: 3,
                     fontSize: "1rem",
-                    fontWeight: 500,
-                    textTransform: "none"
+                    fontWeight: "bold",
+                    textTransform: "none",
+                    borderRadius: 2,
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                    '&:hover': {
+                      borderColor: theme.palette.primary.dark,
+                      backgroundColor: theme.palette.primary.main + '10',
+                      transform: 'translateY(-1px)',
+                    }
                   }}
                 >
                   Share

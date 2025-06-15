@@ -14,7 +14,7 @@ import {
   Avatar,
   useTheme,
 } from '@mui/material';
-import { Add, Search, LocationOn, Phone, Schedule, Wifi, LocalCafe, Star, AttachMoney, DirectionsCar, Pets } from '@mui/icons-material';
+import { Add, Search, LocationOn, Phone, Wifi, LocalCafe, Star, AttachMoney, DirectionsCar, Pets, AccessTime } from '@mui/icons-material';
 import AppBarLayout from '../../layouts/AppBarLayout';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
@@ -49,8 +49,19 @@ const CafesPage = () => {
   const filteredCafes = cafes.filter(
     (cafe) =>
       cafe.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cafe.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cafe.specialty?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cafe.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      cafe.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // New database structure
+      cafe.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cafe.location?.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cafe.location?.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Legacy structure
+      cafe.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cafe.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cafe.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Features search
+      cafe.features?.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const getTextDirection = (text) => {
@@ -62,8 +73,6 @@ const CafesPage = () => {
     const persianRegex = /[\u0600-\u06FF]/;
     return persianRegex.test(text) ? "'Vazir', sans-serif" : "'Roboto', sans-serif";
   };
-
-  const cafeColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F8B500', '#FF8A80'];
 
   return (
     <AppBarLayout
@@ -77,7 +86,7 @@ const CafesPage = () => {
         {/* Search */}
         <TextField
           fullWidth
-          placeholder="Search cafés by name, specialty, or location..."
+          placeholder="Search cafés by name, specialty, category, or location..."
           variant="outlined"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -104,7 +113,7 @@ const CafesPage = () => {
 
         {/* Cafes Grid */}
         <Grid container spacing={3}>
-          {filteredCafes.map((cafe, index) => (
+          {filteredCafes.map((cafe) => (
             <Grid item xs={12} sm={6} md={4} key={cafe.id}>
               <Card
                 sx={{
@@ -171,21 +180,43 @@ const CafesPage = () => {
                     </Box>
                   )}
 
-                  {cafe.specialty && (
-                    <Box sx={{ mb: 2 }}>
+                  {/* Specialty and Category */}
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                    {cafe.specialty && (
                       <Chip
                         label={cafe.specialty}
                         size="small"
                         variant="outlined"
                         color="primary"
                       />
-                    </Box>
-                  )}
+                    )}
+                    {cafe.category && cafe.category !== 'Cafe' && (
+                      <Chip
+                        label={cafe.category}
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    )}
+                  </Box>
 
+                  {/* Location */}
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Chip
                       icon={<LocationOn />}
-                      label={`${cafe.address}, ${cafe.city}`}
+                      label={(() => {
+                        // Support both new and legacy location structures
+                        if (cafe.location?.address && cafe.location?.city) {
+                          return `${cafe.location.address}, ${cafe.location.city}`;
+                        } else if (cafe.address && cafe.city) {
+                          return `${cafe.address}, ${cafe.city}`;
+                        } else if (cafe.location?.city) {
+                          return cafe.location.city;
+                        } else if (cafe.city) {
+                          return cafe.city;
+                        }
+                        return 'Location not specified';
+                      })()}
                       size="small"
                       variant="outlined"
                       sx={{
@@ -198,11 +229,12 @@ const CafesPage = () => {
                     />
                   </Box>
 
-                  {cafe.phone && (
+                  {/* Phone - support both new and legacy structures */}
+                  {(cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone) && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Chip
                         icon={<Phone />}
-                        label={cafe.phone}
+                        label={cafe.contactInfo?.phone || cafe.contact?.phone || cafe.phone}
                         size="small"
                         variant="outlined"
                         color="secondary"
@@ -210,18 +242,42 @@ const CafesPage = () => {
                     </Box>
                   )}
 
-                  {cafe.hours && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  {/* Hours - show today's hours if available */}
+                  {cafe.hours && typeof cafe.hours === 'object' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Chip
-                        icon={<Schedule />}
+                        icon={<AccessTime />}
+                        label={(() => {
+                          const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                          const todayHours = cafe.hours[today];
+                          return todayHours || 'Hours available';
+                        })()}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          '& .MuiChip-icon': {
+                            color: theme.palette.success.main
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
+
+                  {/* Legacy hours support */}
+                  {cafe.hours && typeof cafe.hours === 'string' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Chip
+                        icon={<AccessTime />}
                         label={cafe.hours}
                         size="small"
                         variant="outlined"
                         sx={{
-                          borderColor: '#28a745',
-                          color: '#28a745',
+                          borderColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
                           '& .MuiChip-icon': {
-                            color: '#28a745'
+                            color: theme.palette.success.main
                           }
                         }}
                       />
@@ -247,60 +303,106 @@ const CafesPage = () => {
                     </Typography>
                   )}
 
+                  {/* Features - show first few features */}
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                    {cafe.hasWifi && (
-                      <Chip
-                        icon={<Wifi />}
-                        label="WiFi"
-                        size="small"
-                        sx={{
-                          bgcolor: theme.palette.info.main,
-                          color: theme.palette.info.contrastText,
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: theme.palette.info.contrastText
-                          }
-                        }}
-                      />
+                    {/* New database structure - features array */}
+                    {cafe.features && Array.isArray(cafe.features) && cafe.features.slice(0, 4).map((feature, featureIndex) => {
+                      // Map feature names to icons
+                      const getFeatureIcon = (featureName) => {
+                        const lowerFeature = featureName.toLowerCase();
+                        if (lowerFeature.includes('wifi')) return <Wifi />;
+                        if (lowerFeature.includes('parking')) return <DirectionsCar />;
+                        if (lowerFeature.includes('pet')) return <Pets />;
+                        return null;
+                      };
+
+                      return (
+                        <Chip
+                          key={featureIndex}
+                          icon={getFeatureIcon(feature)}
+                          label={feature.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(111, 66, 193, 0.1)',
+                            color: theme.palette.primary.main,
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold'
+                          }}
+                        />
+                      );
+                    })}
+
+                    {/* Legacy structure support */}
+                    {!cafe.features && (
+                      <>
+                        {cafe.hasWifi && (
+                          <Chip
+                            icon={<Wifi />}
+                            label="WiFi"
+                            size="small"
+                            sx={{
+                              bgcolor: theme.palette.info.main,
+                              color: theme.palette.info.contrastText,
+                              fontWeight: 'bold',
+                              '& .MuiChip-icon': {
+                                color: theme.palette.info.contrastText
+                              }
+                            }}
+                          />
+                        )}
+                        {cafe.hasOutdoorSeating && (
+                          <Chip
+                            label="Outdoor"
+                            size="small"
+                            sx={{
+                              bgcolor: theme.palette.success.main,
+                              color: theme.palette.success.contrastText,
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        )}
+                        {cafe.hasParking && (
+                          <Chip
+                            icon={<DirectionsCar />}
+                            label="Parking"
+                            size="small"
+                            sx={{
+                              bgcolor: theme.palette.secondary.main,
+                              color: theme.palette.secondary.contrastText,
+                              fontWeight: 'bold',
+                              '& .MuiChip-icon': {
+                                color: theme.palette.secondary.contrastText
+                              }
+                            }}
+                          />
+                        )}
+                        {cafe.petFriendly && (
+                          <Chip
+                            icon={<Pets />}
+                            label="Pet Friendly"
+                            size="small"
+                            sx={{
+                              bgcolor: theme.palette.warning.main,
+                              color: theme.palette.warning.contrastText,
+                              fontWeight: 'bold',
+                              '& .MuiChip-icon': {
+                                color: theme.palette.warning.contrastText
+                              }
+                            }}
+                          />
+                        )}
+                      </>
                     )}
-                    {cafe.hasOutdoorSeating && (
+
+                    {/* Show count if more features available */}
+                    {cafe.features && cafe.features.length > 4 && (
                       <Chip
-                        label="Outdoor"
+                        label={`+${cafe.features.length - 4} more`}
                         size="small"
                         sx={{
-                          bgcolor: theme.palette.success.main,
-                          color: theme.palette.success.contrastText,
-                          fontWeight: 'bold'
-                        }}
-                      />
-                    )}
-                    {cafe.hasParking && (
-                      <Chip
-                        icon={<DirectionsCar />}
-                        label="Parking"
-                        size="small"
-                        sx={{
-                          bgcolor: theme.palette.secondary.main,
-                          color: theme.palette.secondary.contrastText,
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: theme.palette.secondary.contrastText
-                          }
-                        }}
-                      />
-                    )}
-                    {cafe.petFriendly && (
-                      <Chip
-                        icon={<Pets />}
-                        label="Pet Friendly"
-                        size="small"
-                        sx={{
-                          bgcolor: theme.palette.warning.main,
-                          color: theme.palette.warning.contrastText,
-                          fontWeight: 'bold',
-                          '& .MuiChip-icon': {
-                            color: theme.palette.warning.contrastText
-                          }
+                          bgcolor: 'rgba(108, 117, 125, 0.1)',
+                          color: theme.palette.text.secondary,
+                          fontSize: '0.75rem'
                         }}
                       />
                     )}

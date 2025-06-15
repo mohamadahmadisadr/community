@@ -11,8 +11,6 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Card,
-  CardContent,
   CardMedia,
   Chip,
   Avatar,
@@ -24,9 +22,7 @@ import {
   Restaurant,
   LocationOn,
   Phone,
-  Schedule,
   Share,
-  OpenInNew,
   CalendarToday,
   Star,
   AttachMoney,
@@ -35,7 +31,8 @@ import {
   Payment,
   CheckCircle,
   AccessTime,
-  Dining
+  Dining,
+  MenuBook
 } from "@mui/icons-material";
 import { db } from "../../firebaseConfig";
 import { getClickableChipProps } from '../../utils/contactUtils';
@@ -416,6 +413,32 @@ const RestaurantDetailPage = () => {
                       }}
                       onClick={() => window.open(restaurant.contact?.website || restaurant.contactInfo?.website, '_blank')}
                       title={`Visit ${restaurant.contact?.website || restaurant.contactInfo?.website}`}
+                    />
+                  </Box>
+                )}
+
+                {/* Menu URL */}
+                {restaurant.menuUrl && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Chip
+                      icon={<MenuBook />}
+                      label="View Menu"
+                      variant="outlined"
+                      sx={{
+                        borderColor: theme.palette.warning.main,
+                        color: theme.palette.warning.main,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out',
+                        '& .MuiChip-icon': {
+                          color: theme.palette.warning.main
+                        },
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: theme.shadows[2],
+                          backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                        }
+                      }}
+                      onClick={() => window.open(restaurant.menuUrl, '_blank')}
                     />
                   </Box>
                 )}

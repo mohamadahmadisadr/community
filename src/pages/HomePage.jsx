@@ -27,30 +27,26 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
     navigate(`/job/${job.id}`);
   };
 
-  const handleShare = (job, event) => {
-    event.stopPropagation(); // Prevent card click
-    const jobUrl = `${window.location.origin}/job/${job.id}`;
 
-    if (navigator.share) {
-      navigator.share({
-        title: job.title,
-        text: `Check out this job opportunity: ${job.title}`,
-        url: jobUrl,
-      });
-    } else {
-      navigator.clipboard.writeText(jobUrl).then(() => {
-        alert("Job link copied to clipboard!");
-      });
-    }
-  };
 
   const filteredJobs = jobs.filter(
     (job) =>
       job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.city?.toLowerCase().includes(searchQuery.toLowerCase()) || // Backward compatibility
+      job.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      job.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // New database structure
+      job.location?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.location?.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Legacy structure
+      job.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.province?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Job type search (both new and legacy)
+      job.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.jobType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Requirements and benefits search
+      job.requirements?.some(req => req.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      job.benefits?.some(benefit => benefit.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // Infinite Scroll Pagination
@@ -112,7 +108,7 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
 
         {/* Jobs Grid */}
         <Grid container spacing={3}>
-          {displayedJobs.map((job, index) => (
+          {displayedJobs.map((job) => (
             <Grid item xs={12} sm={6} md={4} key={job.id}>
               <Card
                 sx={{
@@ -193,9 +189,10 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
 
                   {/* Job Details */}
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                    {job.jobType && (
+                    {/* Job Type - support both new 'type' and legacy 'jobType' */}
+                    {(job.type || job.jobType) && (
                       <Chip
-                        label={job.jobType}
+                        label={(job.type || job.jobType).charAt(0).toUpperCase() + (job.type || job.jobType).slice(1)}
                         size="small"
                         variant="outlined"
                         color="primary"
@@ -206,6 +203,36 @@ const HomePage = ({ jobs, searchQuery, onSearch }) => {
                         label={job.category}
                         size="small"
                         color="secondary"
+                      />
+                    )}
+                    {/* Remote work indicator */}
+                    {job.location?.remote && (
+                      <Chip
+                        label="Remote"
+                        size="small"
+                        variant="outlined"
+                        color="success"
+                      />
+                    )}
+                    {/* Salary range if available */}
+                    {job.salary && (job.salary.min || job.salary.max) && (
+                      <Chip
+                        label={(() => {
+                          const min = job.salary.min ? `$${job.salary.min.toLocaleString()}` : null;
+                          const max = job.salary.max ? `$${job.salary.max.toLocaleString()}` : null;
+
+                          if (min && max) {
+                            return `$${job.salary.min.toLocaleString()}-${job.salary.max.toLocaleString()}`;
+                          } else if (min) {
+                            return `From $${job.salary.min.toLocaleString()}`;
+                          } else if (max) {
+                            return `Up to $${job.salary.max.toLocaleString()}`;
+                          }
+                          return '';
+                        })()}
+                        size="small"
+                        variant="outlined"
+                        color="info"
                       />
                     )}
                   </Box>
