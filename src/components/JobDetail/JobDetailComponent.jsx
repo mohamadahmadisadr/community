@@ -198,7 +198,8 @@ const JobDetailPage = () => {
               fontFamily: getFontFamily(job.title),
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              color: theme.palette.primary.contrastText
             }}
           >
             {job.title}

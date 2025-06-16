@@ -21,6 +21,9 @@ const CafeDetailPage = lazy(() => import('./components/cafes/CafeDetailPage'));
 const EventDetailPage = lazy(() => import('./components/events/EventDetailPage'));
 const AddRestaurantPage = lazy(() => import('./components/restaurants/AddRestaurantPage'));
 const AddCafePage = lazy(() => import('./components/cafes/AddCafePage'));
+const RentPage = lazy(() => import('./components/rent/RentPage'));
+const AddRentPage = lazy(() => import('./components/rent/AddRentPage'));
+const RentDetailPage = lazy(() => import('./components/rent/RentDetailPage'));
 const ProfilePage = lazy(() => import('./components/profile/ProfilePage'));
 
 // Loading component
@@ -51,6 +54,7 @@ function App() {
               <Route path="/dining" element={<DiningPage/>}/>
               <Route path="/restaurants" element={<DiningPage/>}/>
               <Route path="/cafes" element={<DiningPage/>}/>
+              <Route path="/rent" element={<RentPage/>}/>
               <Route path="/profile" element={<ProfilePage/>}/>
               <Route path="/login" element={<LoginComponent/>}/>
               <Route path="/register" element={<RegisterComponent/>}/>
@@ -59,10 +63,12 @@ function App() {
               <Route path="/event/:id" element={<EventDetailPage/>}/>
               <Route path="/restaurant/:id" element={<RestaurantDetailPage/>}/>
               <Route path="/cafe/:id" element={<CafeDetailPage/>}/>
+              <Route path="/rent/:id" element={<RentDetailPage/>}/>
               <Route path='/addJob' element={<AddJobPage/>}/>
               <Route path='/addEvent' element={<AddEventPage/>}/>
               <Route path='/addRestaurant' element={<AddRestaurantPage/>}/>
               <Route path='/addCafe' element={<AddCafePage/>}/>
+              <Route path='/addRent' element={<AddRentPage/>}/>
               <Route path="*" element={<div>404 Not Found</div>}/>
             </Routes>
           </Suspense>

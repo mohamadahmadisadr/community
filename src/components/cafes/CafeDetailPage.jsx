@@ -214,7 +214,8 @@ const CafeDetailPage = () => {
               fontFamily: getFontFamily(cafe.name),
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              color: theme.palette.primary.contrastText
             }}
           >
             {cafe.name}

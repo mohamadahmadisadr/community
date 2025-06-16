@@ -254,7 +254,8 @@ const EventDetailPage = () => {
               fontFamily: getFontFamily(event.title),
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              color: theme.palette.primary.contrastText
             }}
           >
             {event.title}

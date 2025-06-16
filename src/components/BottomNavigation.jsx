@@ -1,6 +1,5 @@
-
 import { BottomNavigation as MuiBottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import { Work, Event, Restaurant, Person } from '@mui/icons-material';
+import { Work, Event, Restaurant, Home, Person } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const BottomNavigation = () => {
@@ -16,8 +15,10 @@ const BottomNavigation = () => {
       return 1;
     } else if (path.startsWith('/dining') || path.startsWith('/restaurants') || path.startsWith('/cafes') || path.startsWith('/addRestaurant') || path.startsWith('/addCafe')) {
       return 2;
-    } else if (path.startsWith('/profile')) {
+    } else if (path.startsWith('/rent') || path.startsWith('/house') || path.startsWith('/addHouse')) {
       return 3;
+    } else if (path.startsWith('/profile')) {
+      return 4;
     }
     return 0; // Default to jobs
   };
@@ -34,6 +35,9 @@ const BottomNavigation = () => {
         navigate('/dining');
         break;
       case 3:
+        navigate('/rent');
+        break;
+      case 4:
         navigate('/profile');
         break;
       default:
@@ -86,6 +90,10 @@ const BottomNavigation = () => {
         <BottomNavigationAction
           label="Dining"
           icon={<Restaurant />}
+        />
+        <BottomNavigationAction
+          label="Rent"
+          icon={<Home />}
         />
         <BottomNavigationAction
           label="Profile"
