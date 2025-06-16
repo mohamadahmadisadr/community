@@ -817,9 +817,8 @@ const AddRentPage = () => {
             Availability
           </Typography>
 
-          <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid item xs={12} md={6}>
-              <TextField
+          <Box sx={{ mb: 2 }} direction="column" display="flex" justifyContent="space-between" gap={2}>
+             <TextField
                 fullWidth
                 label="Available From *"
                 name="availableFrom"
@@ -829,8 +828,7 @@ const AddRentPage = () => {
                 required
                 InputLabelProps={{ shrink: true }}
               />
-            </Grid>
-            <Grid item xs={12} md={6}>
+             
               <TextField
                 select
                 fullWidth
@@ -846,8 +844,8 @@ const AddRentPage = () => {
                   </MenuItem>
                 ))}
               </TextField>
-            </Grid>
-          </Grid>
+            
+              </Box>
 
           <TextField
             fullWidth
